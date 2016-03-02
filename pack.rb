@@ -1,4 +1,4 @@
-# run this with cshoes.exe --ruby poc.rb
+# run this with cshoes.exe --ruby pack.rb
 require 'yaml'
 require 'fileutils'
 opts = YAML.load_file('ytm.yaml')
@@ -29,7 +29,7 @@ toplevel = []
 Dir.chdir(DIR) do
   Dir.glob('*') {|f| toplevel << f}
 end
-exclude = %w(static CHANGELOG.txt  gmon.out README.txt
+exclude = %w(static CHANGELOG.txt cshoes.exe gmon.out README.txt
   samples)
 #exclude = []
 packdir = 'packdir'
@@ -59,6 +59,8 @@ rm_rf "#{packdir}/lib/gtk-2.0"
 ['cobbler', 'debugger', 'irb', 'pack', 'app_package', 'packshoes',
   'remote_debugger', 'winject', 'envgem'].each {|f| rm "#{packdir}/lib/shoes/#{f}.rb" }
   
+# rename shoes.exe (code inside is the same - it invokes lib/shoes.rb - which gets changed)
+mv "#{packdir}/shoes.exe",  "#{packdir}/#{opts['app_name']}.exe"
 # copy app contents (file/dir at a time)
 app_contents = Dir.glob("#{opts['app_loc']}/*")
 app_contents.each do |p|
