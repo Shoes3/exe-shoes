@@ -1,4 +1,4 @@
-= Exe-Shoes =
+# Exe-Shoes 
 
 This is a Windows only project that packages a Shoes project into a more 
 developer friendly Windows .exe. It attempts to hide the use of Shoes as
@@ -10,7 +10,7 @@ At some point in the future there might be a GUI (packaged Shoes.app) to create 
 and run the build for you. Don't wait for that, it's only eye candy and if it is written
 probably doesn't do what you want. 
 
-== Requirements ==
+## Requirements 
 
 * You need Shoes 3.3.x installed on your Windows machine. 
 * You need NSIS Unicode installed on your Windows machine. Version 2.45.6 is good
@@ -20,7 +20,7 @@ probably doesn't do what you want.
 * your may have to modify Ruby and NSIS scripts.
 * You'll probably want a git client and configure it on your Windows machine.
 
-== Contents ==
+## Contents 
 
 You need to clone this project. Inside is ytm/ which is a sample application
 and ytm.yaml. There is a pack.rb which does all the work. You'll probably
