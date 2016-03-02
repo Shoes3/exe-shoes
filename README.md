@@ -1,0 +1,3 @@
+build an .exe with a minimal Shoes (no manual or static)
+no chipmonk or ftsearch or... 
+Only works on Windows.

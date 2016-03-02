@@ -1,0 +1,1 @@
+/home/ccoupe/Projects/shoes3/platform/msw/EnvVarUpdate.nsh

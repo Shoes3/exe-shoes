@@ -1,0 +1,14 @@
+system_nsis: C:/Program Files (x86)/NSIS/Unicode/makensis/exe
+app_name: Ytm
+app_version: 2
+app_loc: E:/ytm/
+app_start: ytm.rb
+app_nsis_dir: 'nsis'
+app_ico: E:/icons/ytm/ytm.ico
+include_exts:
+ - chipmunk
+include_gems:
+ - sqlite3
+ - nokogiri-1.6.7.1-x86-mingw32
+ - ffi-1.9.10-x86-mingw32
+ - rubyserial-0.2.4
