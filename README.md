@@ -18,6 +18,8 @@ probably doesn't do what you want.
 * You need Shoes 3.3.x installed on your Windows machine. 
 * You need NSIS Unicode installed on your Windows machine. Version 2.45.6 is good
   Please use NSIS Unicode if you value your users. 
+* You [http://www.angusj.com/resourcehacker](Resource Hacker) or some way
+  to set the icon of and exe
 * Must be willing to learn enough about NSIS packaging and accept it's rules.
 * Must be willing to use the Windows commandline (or the msys commandline)
 * You may have to modify Ruby and NSIS scripts.

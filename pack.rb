@@ -1,6 +1,7 @@
 # run this with cshoes.exe --ruby pack.rb
 require 'yaml'
 require 'fileutils'
+require 'shoes/winject'
 opts = YAML.load_file('ytm.yaml')
 here = Dir.getwd
 home = ENV['HOME']
@@ -113,13 +114,33 @@ mkdir_p "pkg"
 #cp_r "VERSION.txt", "#{packdir}/VERSION.txt"
 rm_rf "#{packdir}/nsis"
 cp_r  "nsis", "#{packdir}/nsis"
-cp opts['app_ico'], "#{packdir}/nsis/setup.ico"
+# Icon for installer
+cp opts['app_installer_ico'], "#{packdir}/nsis/setup.ico"
+# stuff icon into a new app_name.exe
+    exe = Winject::EXE.new("nsis/shoes-stub.exe")
+#    exe.inject_string(Winject::EXE::SHOES_APP_NAME, "shoes.rb")
+#    exe.inject_file(Winject::EXE::SHOES_APP_CONTENT, f.read)
+#    exe.inject_string(Winject::EXE::SHOES_DOWNLOAD_SITE, opts['dnlhost'])
+#    exe.inject_string(Winject::EXE::SHOES_DOWNLOAD_PATH, opts['dnlpath'])
+#    if opts['winargs']
+#      puts "injecting #{opts['winargs']}"
+#      exe.inject_string(Winject::EXE::SHOES_USE_ARGS, opts['winargs'])
+#    end
+    exe.inject_icons(opts['app_ico'])
+    
+#    f2 = File.open(opts['shoesdist'],'rb')
+#   if blk 
+#      blk.call "Repack Shoes.exe #{opts['shoesdist']} distribution"
+#    end
+#    exe.inject_file(Winject::EXE::SHOES_SYS_SETUP, f2.read)
+    exe.save("#{packdir}/#{opts['app_name']}.exe") 
+ 
 newn = File.open("#{packdir}/nsis/#{opts['app_name']}.nsi", 'w')
 rewrite newn, "#{packdir}/nsis/base.nsi", {'APPNAME' => opts['app_name'],
   'WINVERSION' => opts['app_version']}
 # rewrite "#{TGT_DIR}/nsis/base.nsi", "#{TGT_DIR}/nsis/#{WINFNAME}.nsi"
 Dir.chdir("#{packdir}/nsis") do
-   system "\"c:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi"
+  system "\"c:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi"
   #sh "\"c:\\Program Files (x86)\\NSIS\\makensis.exe\" #{WINFNAME}.nsi" 
 end
-mv "#{packdir}/nsis/#{opts['app_name']}.exe", '.'
+#mv "#{packdir}/nsis/#{opts['app_name']}.exe", '.'
