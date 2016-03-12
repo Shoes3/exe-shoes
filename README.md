@@ -22,7 +22,7 @@ probably doesn't do what you want.
   to set the icon of and exe
 * Must be willing to learn enough about NSIS packaging and accept it's rules.
 * Must be willing to use the Windows commandline (or the msys commandline)
-* You may have to modify Ruby and NSIS scripts.
+* You may have to modify the scripts in the project and NSIS scripts.
 * You'll probably want a git client and configure it on your Windows machine.
 
 ## Contents 

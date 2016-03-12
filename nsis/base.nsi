@@ -76,8 +76,8 @@ Section "MainSection" SEC01
    !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
       CreateDirectory "$SMPROGRAMS\${SHOES_NAME}"
       CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\${SHOES_NAME}.lnk" "$INSTDIR\${SHOES_NAME}.exe"
-      CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Manual.lnk" "$INSTDIR\${SHOES_NAME}.exe" "--manual"
-      CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Packager.lnk" "$INSTDIR\${SHOES_NAME}.exe" "--package"
+      ;CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Manual.lnk" "$INSTDIR\${SHOES_NAME}.exe" "--manual"
+      ;CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Packager.lnk" "$INSTDIR\${SHOES_NAME}.exe" "--package"
    !insertmacro MUI_STARTMENU_WRITE_END
    
    CreateShortCut "$DESKTOP\${SHOES_NAME}.lnk" "$INSTDIR\${SHOES_NAME}.exe"
@@ -85,14 +85,11 @@ Section "MainSection" SEC01
    File /r /x nsis ..\*.*
    
    ${EnvVarUpdate} $0 "PATH" "A" HKLM $INSTDIR
-   ${EnvVarUpdate} $0 "FONTCONFIG_FILE" "A" HKLM "$INSTDIR\etc\fonts\fonts.conf"
    ${registerExtension} "$INSTDIR\${SHOES_NAME}.exe" ".shy" "Shoes Application"
-   DetailPrint "Building font cache, this may take a while..."
-   ExecWait '"$INSTDIR\fc-cache.exe" "-f"'
 SectionEnd
 
 Section -AdditionalIcons
-   CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
+   ;CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -126,7 +123,6 @@ Section Uninstall
    
    ${unregisterExtension} ".shy" "Shoes Application"
    ${un.EnvVarUpdate} $0 "PATH" "R" HKLM $INSTDIR
-   ${un.EnvVarUpdate} $0 "FONTCONFIG_FILE" "R" HKLM "$INSTDIR\etc\fonts\fonts.conf"
 
    DeleteRegKey ${SHOES_UNINST_ROOT_KEY} "${SHOES_UNINST_KEY}"
    DeleteRegKey HKLM "${SHOES_INST_KEY}"
