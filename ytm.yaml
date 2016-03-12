@@ -1,12 +1,11 @@
-system_nsis: C:/Program Files (x86)/NSIS/Unicode/makensis.exe
 app_name: Ytm
 app_version: 2
 app_loc: C:/Projects/exe-shoes/ytm/
 app_start: ytm.rb
-app_nsis_dir: 'nsis'
-#app_exe_stub: 
 app_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 app_installer_ico: C:/Projects/exe-shoes/ytm/ytm.ico
+installer_sidebar_bmp: E:/icons/ytm/installer-1.bmp
+installer_header_bmp: E:/icons/ytm/installer-2.bmp
 include_exts:
  - chipmunk
 include_gems:

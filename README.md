@@ -15,11 +15,12 @@ probably doesn't do what you want.
 
 ## Requirements 
 
-* You need Shoes 3.3.x installed on your Windows machine. 
+* You need Shoes 3.3.1 (r2480 or newer) installed on your Windows machine doing the 
+  packaging
 * You need NSIS Unicode installed on your Windows machine. Version 2.45.6 is good
   Please use NSIS Unicode if you value your users. 
-* You [http://www.angusj.com/resourcehacker](Resource Hacker) or some way
-  to set the icon of and exe
+* You need [http://www.angusj.com/resourcehacker](Resource Hacker) or some way
+  to set the icon of an exe
 * Must be willing to learn enough about NSIS packaging and accept it's rules.
 * Must be willing to use the Windows commandline (or the msys commandline)
 * You may have to modify the scripts in the project and NSIS scripts.
@@ -46,13 +47,14 @@ ENV['vars'] and Constants you'll find in Shoes. Like DIR and without the GUI.
 Modify pack.rb to load the .yaml file for your app.  The .yaml for the example
 ytm is 
 ```
-system_nsis: C:/Program Files (x86)/NSIS/Unicode/makensis.exe
 app_name: Ytm
 app_version: 2
-app_loc: E:/exe-shoes/ytm/
+app_loc: C:/Projects/exe-shoes/ytm/
 app_start: ytm.rb
-app_nsis_dir: 'nsis'
-app_ico: E:/exe-shoes/ytm/ytm.ico
+app_ico: C:/Projects/exe-shoes/ytm/ytm.ico
+app_installer_ico: C:/Projects/exe-shoes/ytm/ytm.ico
+installer_sidebar_bmp: E:/icons/ytm/installer-1.bmp
+installer_header_bmp: E:/icons/ytm/installer-2.bmp
 include_exts:
  - chipmunk
 include_gems:
@@ -67,7 +69,7 @@ include_gems:
  where point to it.
  
  If you want to include Shoes exts, ftsearch and chipmunk you would list them here.
- Unless you really do need chipmunk you shouldn't add like I show above. Since you're not
+ Unless you really do need chipmunk you shouldn't add it like I show above. Since you're not
  going to get a manual, you don't need ftsearch.
  
  Gem are fun. You can include Shoes built in gems like sqlite and nokogiri as shown above
@@ -79,9 +81,14 @@ include_gems:
  === app_name, app_version:
 
 Beware! these are sent to the nsis script and it's very particular. Even worse
-pack.rb uses app_name: to do some things. Expect some confusion and trouble. 
+pack.rb uses app_name: to do multiple duty. Expect some confusion and trouble. 
 Nothing that couldn't be fixed with another yaml entry and some coding. Maybe 
 app_full_name: or the other side could be app_exe_name: Or both. 
+
+NSIS expects app_version to be a string and all it really does is name the exe
+#{app_name}-#{app_version}. Expect annoyance. 
+
+Read the pack.rb script. It's not that big and it's yours now.
 
 == NSIS
 
@@ -90,15 +97,17 @@ are just slightly modified from what Shoes uses for building Shoes exe's.
 You can and probably should modify things for what you want the installer 
 to do and look like.
 
-It you're going to use the included default script your certainly want to 
+It you're going to use the included default script you'll certainly want to 
 replace the installer-1.bmp and install-2.bmp with your own images. You'll want
-width and height to be very close to what is used. 
+width and height to be very close to what is used. These have too be ancient format bmps
+24 bit, no color space.  Not my rules. Accept what NSIS wants. 
 
 === base.nsis
 
 If you peek at base.nsis you'll see some Shoes entries that you probably 
 don't want people to see if you're trying to hide Shoes or behavior you 
 don't want. I don't want to sound too cavalier, but it's your base.nsi and pack.rb
-to modify as you need.
+to modify as you need. You'll have to consider the Liscensing terms in COPYING.txt and rewrite 
+that for your code while giving credit to what is there. 
 
 

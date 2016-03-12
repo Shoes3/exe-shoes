@@ -31,8 +31,8 @@ Var UninstallerHasFinished
 
 ; MUI Pages
 !insertmacro MUI_PAGE_WELCOME
-!define MUI_PAGE_HEADER_TEXT "Shoes is MIT Licensed"
-!define MUI_PAGE_HEADER_SUBTEXT "You are free to do as you please with Shoes."
+!define MUI_PAGE_HEADER_TEXT "This program use some MIT Licensed software"
+!define MUI_PAGE_HEADER_SUBTEXT "You are free to do as you please with that part of the code."
 !define MUI_LICENSEPAGE_TEXT_TOP "When you are ready to continue with Setup, click I Agree."
 !define MUI_LICENSEPAGE_TEXT_BOTTOM " "
 !insertmacro MUI_PAGE_LICENSE "..\COPYING.txt"

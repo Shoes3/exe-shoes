@@ -107,14 +107,23 @@ incl_gems.each do |name|
 end
 
 puts "make_installer"
+
 mkdir_p "pkg"
 #cp_r "VERSION.txt", "#{packdir}/VERSION.txt"
 rm_rf "#{packdir}/nsis"
 cp_r  "nsis", "#{packdir}/nsis"
 # Icon for installer
 cp opts['app_installer_ico'], "#{packdir}/nsis/setup.ico"
-# stuff icon into a new app_name.exe  using shoes.exe
-
+# change nsis side bar and top images (bmp only)
+sb_img = opts['installer_sidebar_bmp'] 
+if sb_img
+ cp sb_img, "#{packdir}/nsis/installer-1.bmp"
+end
+tp_img = opts['installer_header_bmp']
+if tp_img 
+ cp tp_img, "#{packdir}/nsis/installer-2.bmp"
+end
+# stuff icon into a new app_name.exe using shoes.exe 
 Dir.chdir(packdir) do |p|
   winico_path = "#{opts['app_ico'].tr('/','\\')}"
   cmdl = "\"C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe\" -modify  shoes.exe, #{opts['app_name']}.exe, #{winico_path}, icongroup,32512,1033"
@@ -133,4 +142,3 @@ Dir.chdir("#{packdir}/nsis") do |p|
   system "\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi\""
   Dir.glob('*.exe') { |p| mv p, '../../pkg' }
 end
-mv 
