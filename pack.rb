@@ -57,11 +57,9 @@ end
 rm_rf "#{packdir}/lib/exerb"
 rm_rf "#{packdir}/lib/gtk-2.0"
 # remove unreachable code in packdir/lib/shoes/ like help, app-package ...
-['cobbler', 'debugger', 'irb', 'pack', 'app_package', 'packshoes',
-  'remote_debugger', 'winject', 'envgem'].each {|f| rm "#{packdir}/lib/shoes/#{f}.rb" }
+#['cobbler', 'debugger', 'irb', 'pack', 'app_package', 'packshoes',
+#  'remote_debugger', 'winject', 'envgem'].each {|f| rm "#{packdir}/lib/shoes/#{f}.rb" }
   
-# rename shoes.exe (code inside is the same - it invokes lib/shoes.rb - which gets changed)
-mv "#{packdir}/shoes.exe",  "#{packdir}/#{opts['app_name']}.exe"
 # copy app contents (file/dir at a time)
 app_contents = Dir.glob("#{opts['app_loc']}/*")
 app_contents.each do |p|
@@ -70,7 +68,7 @@ end
 #create new lib/shoes.rb with rewrite
 newf = File.open("#{packdir}/lib/shoes.rb", 'w')
 rewrite newf, 'min-shoes.rb', {'APP_START' => opts['app_start'] }
- 
+newf.close
 # copy/remove gems - tricksy - pay attention
 # remove the Shoes built-in gems if not in the list 
 incl_gems = opts['include_gems']
@@ -108,7 +106,6 @@ incl_gems.each do |name|
   cp_r "#{GEMS_DIR}/gems/#{name}", "#{sgpath}/gems"
 end
 
-# now it's time to use makensis on packdir and hope for the best.
 puts "make_installer"
 mkdir_p "pkg"
 #cp_r "VERSION.txt", "#{packdir}/VERSION.txt"
@@ -116,31 +113,24 @@ rm_rf "#{packdir}/nsis"
 cp_r  "nsis", "#{packdir}/nsis"
 # Icon for installer
 cp opts['app_installer_ico'], "#{packdir}/nsis/setup.ico"
-# stuff icon into a new app_name.exe
-    exe = Winject::EXE.new("nsis/shoes-stub.exe")
-#    exe.inject_string(Winject::EXE::SHOES_APP_NAME, "shoes.rb")
-#    exe.inject_file(Winject::EXE::SHOES_APP_CONTENT, f.read)
-#    exe.inject_string(Winject::EXE::SHOES_DOWNLOAD_SITE, opts['dnlhost'])
-#    exe.inject_string(Winject::EXE::SHOES_DOWNLOAD_PATH, opts['dnlpath'])
-#    if opts['winargs']
-#      puts "injecting #{opts['winargs']}"
-#      exe.inject_string(Winject::EXE::SHOES_USE_ARGS, opts['winargs'])
-#    end
-    exe.inject_icons(opts['app_ico'])
-    
-#    f2 = File.open(opts['shoesdist'],'rb')
-#   if blk 
-#      blk.call "Repack Shoes.exe #{opts['shoesdist']} distribution"
-#    end
-#    exe.inject_file(Winject::EXE::SHOES_SYS_SETUP, f2.read)
-    exe.save("#{packdir}/#{opts['app_name']}.exe") 
- 
+# stuff icon into a new app_name.exe  using shoes.exe
+
+Dir.chdir(packdir) do |p|
+  winico_path = "#{opts['app_ico'].tr('/','\\')}"
+  cmdl = "\"C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe\" -modify  shoes.exe, #{opts['app_name']}.exe, #{winico_path}, icongroup,32512,1033"
+  #puts cmdl
+  if system(cmdl)
+    rm 'shoes.exe' if File.exist?("#{opts['app_name']}.exe")
+  else 
+    puts "FAIL: #{$?} #{cmdl}"
+  end
+end
 newn = File.open("#{packdir}/nsis/#{opts['app_name']}.nsi", 'w')
 rewrite newn, "#{packdir}/nsis/base.nsi", {'APPNAME' => opts['app_name'],
   'WINVERSION' => opts['app_version']}
-# rewrite "#{TGT_DIR}/nsis/base.nsi", "#{TGT_DIR}/nsis/#{WINFNAME}.nsi"
-Dir.chdir("#{packdir}/nsis") do
-  system "\"c:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi"
-  #sh "\"c:\\Program Files (x86)\\NSIS\\makensis.exe\" #{WINFNAME}.nsi" 
+newn.close
+Dir.chdir("#{packdir}/nsis") do |p|
+  system "\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi\""
+  Dir.glob('*.exe') { |p| mv p, '../../pkg' }
 end
-#mv "#{packdir}/nsis/#{opts['app_name']}.exe", '.'
+mv 
