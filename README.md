@@ -78,7 +78,7 @@ include_gems:
  We don't automatically include dependent gems. You'll have to do that yourself with
  proper entries in your yaml file as I've shown above, 'rubyserial' requires 'ffi'
  
- === app_name, app_version:
+### app_name, app_version:
 
 Beware! these are sent to the nsis script and it's very particular. Even worse
 pack.rb uses app_name: to do multiple duty. Expect some confusion and trouble. 
@@ -86,11 +86,12 @@ Nothing that couldn't be fixed with another yaml entry and some coding. Maybe
 app_full_name: or the other side could be app_exe_name: Or both. 
 
 NSIS expects app_version to be a string and all it really does is name the exe
-#{app_name}-#{app_version}. Expect annoyance. 
+`#{app_name}-#{app_version}`. Expect annoyance. 
 
-Read the pack.rb script. It's not that big and it's yours now.
+Read the pack.rb script. It's not that big and it's yours now to do what
+you want.
 
-== NSIS
+## NSIS
 
 NSIS has it's own scripting language and the scripts included in this project
 are just slightly modified from what Shoes uses for building Shoes exe's.  
@@ -102,7 +103,7 @@ replace the installer-1.bmp and install-2.bmp with your own images. You'll want
 width and height to be very close to what is used. These have too be ancient format bmps
 24 bit, no color space.  Not my rules. Accept what NSIS wants. 
 
-=== base.nsis
+### base.nsis
 
 If you peek at base.nsis you'll see some Shoes entries that you probably 
 don't want people to see if you're trying to hide Shoes or behavior you 
