@@ -210,11 +210,11 @@ class Shoes
   end
 
   def self.cobbler
-    require 'shoes/cobbler'
+    #require 'shoes/cobbler'
   end
 
   def self.app_package
-    require 'shoes/app_package'
+    #require 'shoes/app_package'
   end
 
   def self.make_pack
@@ -385,17 +385,17 @@ class Shoes
   end
 
   def self.show_manual
-    manual_as :shoes
+    #manual_as :shoes
   end
 
   def self.show_irb
-    require 'shoes/irb'
-    Shoes.irb
+    #require 'shoes/irb'
+    #Shoes.irb
   end
 
   def self.remote_debug
-    require "shoes/remote_debugger.rb"
-    Shoes.rdb
+    #require "shoes/remote_debugger.rb"
+    #Shoes.rdb
   end
 
   def self.show_log
@@ -407,11 +407,14 @@ class Shoes
         setup
       end
   end
-
+  
   def self.mount(path, meth, &blk)
+    unless @mounts.empty?
+      # checking if app changed
+      @mounts.clear if meth[0] != @mounts[0][1][0]
+    end
     @mounts << [path, meth || blk]
   end
-
 
   # SHOES_URL_RE = %r!^@([^/]+)(.*)$!
   SHOES_URL_RE = %r{^@([^/]+)(.*)$}
@@ -439,10 +442,9 @@ class Shoes
     #Shoes.splash if RUBY_PLATFORM !~ /darwin/ && ARGV.empty?
     #OPTS.parse! ARGV
     #ARGV[0] || true
+    font "#{DIR}/fonts/Lacuna.ttf"
     real_path = "#{DIR}"
     app_path = "#{real_path}/#{APP_START}"
-    #puts "Using #{app_path}"
-    return app_path
   end
 
   def self.uri(str)

@@ -39,6 +39,12 @@ mkdir_p(packdir) # where makensis will find it.
 (toplevel-exclude).each do |p|
   cp_r File.join(DIR, p), packdir
 end
+# we do need some statics for console to work. 
+mkdir_p "#{packdir}/static"
+Dir.glob("#{DIR}/static/icon*.png") {|p| cp p, "#{packdir}/static" }
+if opts['app_png']
+  cp "#{opts['app_loc']}/#{opts['app_png']}", "#{packdir}/static/app-icon.png"
+end
 # remove chipmonk and ftsearch unless requested
 rbmm = RUBY_VERSION[/\d.\d/].to_str
 exts = opts['include_exts'] # returns []
@@ -69,6 +75,10 @@ end
 newf = File.open("#{packdir}/lib/shoes.rb", 'w')
 rewrite newf, 'min-shoes.rb', {'APP_START' => opts['app_start'] }
 newf.close
+# create a new lib/shoes/log.rb with rewrite
+logf = File.open("#{packdir}/lib/shoes/log.rb", 'w')
+rewrite logf, 'min-log.rb', {'CONSOLE_HDR' => "#{opts['app_name']} Errors"}
+logf.close
 # copy/remove gems - tricksy - pay attention
 # remove the Shoes built-in gems if not in the list 
 incl_gems = opts['include_gems']

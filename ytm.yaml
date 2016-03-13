@@ -2,11 +2,13 @@ app_name: Ytm
 app_version: 2
 app_loc: C:/Projects/exe-shoes/ytm/
 app_start: ytm.rb
+app_png: ytm.png
 app_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 app_installer_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 installer_sidebar_bmp: E:/icons/ytm/installer-1.bmp
 installer_header_bmp: E:/icons/ytm/installer-2.bmp
 include_exts:
+ - ftsearch
  - chipmunk
 include_gems:
  - sqlite3
