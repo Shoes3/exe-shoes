@@ -39,10 +39,13 @@ Perhaps you're thinking "I need to know a lot". Yes. Me too.
 
 ## Usage 
 
-`$ cshoes.exe --ruby pack.rb`
+`$ cshoes.exe --ruby ytm-merge.rb`
 
 As you know --ruby means to run Shoes as a mostly standard Ruby with some
-ENV['vars'] and Constants you'll find in Shoes. Like DIR and without the GUI.
+ENV['vars'] and Constants you'll find in Shoes. Like DIR and without showing the GUI.
+
+The **sample** just loads ytm.yaml and calls the Shoes module function
+PackShoes::merge_exe 
 
 Modify pack.rb to load the .yaml file for your app.  The .yaml for the example
 ytm is 
@@ -51,22 +54,26 @@ app_name: Ytm
 app_version: 2
 app_loc: C:/Projects/exe-shoes/ytm/
 app_start: ytm.rb
+app_png: ytm.png
 app_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 app_installer_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 installer_sidebar_bmp: E:/icons/ytm/installer-1.bmp
 installer_header_bmp: E:/icons/ytm/installer-2.bmp
 include_exts:
+ - ftsearch
  - chipmunk
 include_gems:
  - sqlite3
  - nokogiri-1.6.7.1-x86-mingw32
  - ffi-1.9.10-x86-mingw32
  - rubyserial-0.2.4
+
  ```
- This just a demo!  system_nsis: isn't used as I write this nor is app_nsis_dir: 
+ This just a demo!  
  app_loc: is where your app to package is and app_start: is the starting script
- in app_loc. You certainly want your own icon (.ico) for the installer and app_ico: is
- where point to it.
+ in app_loc. app_png is the Shoes icon (if you need it) 
+ You certainly want your own Windows icon (.ico) for the your app app_ico: is
+ where point to it. If you want a different icon for the installer -
  
  If you want to include Shoes exts, ftsearch and chipmunk you would list them here.
  Unless you really do need chipmunk you shouldn't add it like I show above. Since you're not
@@ -88,7 +95,7 @@ app_full_name: or the other side could be app_exe_name: Or both.
 NSIS expects app_version to be a string and all it really does is name the exe
 `#{app_name}-#{app_version}`. Expect annoyance. 
 
-Read the pack.rb script. It's not that big and it's yours now to do what
+Read the merge-exe.rb script. It's not that big and it's yours now to do what
 you want.
 
 ## NSIS
