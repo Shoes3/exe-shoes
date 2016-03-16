@@ -1,11 +1,11 @@
 ; Shoes definitions
-!define SHOES_NAME "#{APPNAME}"
-!define SHOES_VERSION "#{WINVERSION}"
-!define SHOES_PUBLISHER "shoesrb"
-!define SHOES_WEB_SITE "http://shoesrb.com/"
-!define SHOES_INST_KEY "Software\Hackety.org\${SHOES_NAME}"
-!define SHOES_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${SHOES_NAME}"
-!define SHOES_UNINST_ROOT_KEY "HKLM"
+!define APP_NAME "#{APPNAME}"
+!define APP_VERSION "#{WINVERSION}"
+!define APP_PUBLISHER "#{PUBLISHER}"
+!define APP_WEB_SITE "#{WEBSITE}"
+!define APP_INST_KEY "Software\#{HKEY_ORG}\${APP_NAME}"
+!define APP_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
+!define APP_UNINST_ROOT_KEY "HKLM"
 
 SetCompressor /SOLID lzma
 
@@ -38,9 +38,9 @@ Var UninstallerHasFinished
 !insertmacro MUI_PAGE_LICENSE "..\COPYING.txt"
 
 ; MUI Start Menu Folder Page Configuration
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${SHOES_NAME}"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${APP_NAME}"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
-!define MUI_STARTMENUPAGE_REGISTRY_KEY "${SHOES_INST_KEY}" 
+!define MUI_STARTMENUPAGE_REGISTRY_KEY "${APP_INST_KEY}" 
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
@@ -49,7 +49,7 @@ Var UninstallerHasFinished
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 !define MUI_FINISHPAGE_TITLE_3LINES
-!define MUI_FINISHPAGE_RUN "$INSTDIR\${SHOES_NAME}.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\${APP_NAME}.exe"
 !insertmacro MUI_PAGE_FINISH
 
 ; MUI uninstaller pages
@@ -60,10 +60,10 @@ Var UninstallerHasFinished
 !insertmacro MUI_LANGUAGE "English"
 
 ; NSIS Output information
-Name "${SHOES_NAME} ${SHOES_VERSION}"
-OutFile "${SHOES_NAME}-${SHOES_VERSION}.exe"
-InstallDir "$PROGRAMFILES\${SHOES_NAME}"
-InstallDirRegKey HKLM "${SHOES_INST_KEY}" ""
+Name "${APP_NAME} ${APP_VERSION}"
+OutFile "${APP_NAME}-${APP_VERSION}.exe"
+InstallDir "$PROGRAMFILES\${APP_NAME}"
+InstallDirRegKey HKLM "${APP_INST_KEY}" ""
 RequestExecutionLevel admin
 
 ShowInstDetails show
@@ -74,58 +74,58 @@ Section "MainSection" SEC01
    SetOverwrite ifnewer
 
    !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-      CreateDirectory "$SMPROGRAMS\${SHOES_NAME}"
-      CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\${SHOES_NAME}.lnk" "$INSTDIR\${SHOES_NAME}.exe"
-      ;CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Manual.lnk" "$INSTDIR\${SHOES_NAME}.exe" "--manual"
-      ;CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Packager.lnk" "$INSTDIR\${SHOES_NAME}.exe" "--package"
+      CreateDirectory "$SMPROGRAMS\${APP_NAME}"
+      CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_NAME}.exe"
+      ;CreateShortCut "$SMPROGRAMS\${APP_NAME}\Manual.lnk" "$INSTDIR\${APP_NAME}.exe" "--manual"
+      ;CreateShortCut "$SMPROGRAMS\${APP_NAME}\Packager.lnk" "$INSTDIR\${APP_NAME}.exe" "--package"
    !insertmacro MUI_STARTMENU_WRITE_END
    
-   CreateShortCut "$DESKTOP\${SHOES_NAME}.lnk" "$INSTDIR\${SHOES_NAME}.exe"
+   CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_NAME}.exe"
    
    File /r /x nsis ..\*.*
    
    ${EnvVarUpdate} $0 "PATH" "A" HKLM $INSTDIR
-   ${registerExtension} "$INSTDIR\${SHOES_NAME}.exe" ".shy" "Shoes Application"
+   ${registerExtension} "$INSTDIR\${APP_NAME}.exe" ".shy" "Shoes Application"
 SectionEnd
 
 Section -AdditionalIcons
-   ;CreateShortCut "$SMPROGRAMS\${SHOES_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
+   ;CreateShortCut "$SMPROGRAMS\${APP_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
    WriteUninstaller "$INSTDIR\uninst.exe"
-   WriteRegStr HKLM "${SHOES_INST_KEY}" "" "$INSTDIR\${SHOES_NAME}.exe"
-   ;WriteRegStr HKLM "${SHOES_INST_KEY}" "base" "$INSTDIR"
-   WriteRegStr ${SHOES_UNINST_ROOT_KEY} "${SHOES_UNINST_KEY}" "DisplayName" "$(^Name)"
-   WriteRegStr ${SHOES_UNINST_ROOT_KEY} "${SHOES_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-   WriteRegStr ${SHOES_UNINST_ROOT_KEY} "${SHOES_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${SHOES_NAME}.exe"
-   WriteRegStr ${SHOES_UNINST_ROOT_KEY} "${SHOES_UNINST_KEY}" "DisplayVersion" "${SHOES_VERSION}"
-   WriteRegStr ${SHOES_UNINST_ROOT_KEY} "${SHOES_UNINST_KEY}" "URLInfoAbout" "${SHOES_WEB_SITE}"
-   WriteRegStr ${SHOES_UNINST_ROOT_KEY} "${SHOES_UNINST_KEY}" "Publisher" "${SHOES_PUBLISHER}"
+   WriteRegStr HKLM "${APP_INST_KEY}" "" "$INSTDIR\${APP_NAME}.exe"
+   ;WriteRegStr HKLM "${APP_INST_KEY}" "base" "$INSTDIR"
+   WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "DisplayName" "$(^Name)"
+   WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
+   WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${APP_NAME}.exe"
+   WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "DisplayVersion" "${APP_VERSION}"
+   WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "URLInfoAbout" "${APP_WEB_SITE}"
+   WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "Publisher" "${APP_PUBLISHER}"
   
    ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
    IntFmt $0 "0x%08X" $0
-   WriteRegDWORD HKLM "${SHOES_UNINST_KEY}" "EstimatedSize" "$0"
+   WriteRegDWORD HKLM "${APP_UNINST_KEY}" "EstimatedSize" "$0"
 SectionEnd
 
 Section Uninstall
    !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
 
-   Delete "$DESKTOP\${SHOES_NAME}.lnk"
-   Delete "$SMPROGRAMS\${SHOES_NAME}\Manual.lnk"
-   Delete "$SMPROGRAMS\${SHOES_NAME}\Packager.lnk"
-   Delete "$SMPROGRAMS\${SHOES_NAME}\${SHOES_NAME}.lnk"
-   Delete "$SMPROGRAMS\${SHOES_NAME}\Uninstall.lnk"
+   Delete "$DESKTOP\${APP_NAME}.lnk"
+   Delete "$SMPROGRAMS\${APP_NAME}\Manual.lnk"
+   Delete "$SMPROGRAMS\${APP_NAME}\Packager.lnk"
+   Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"
+   Delete "$SMPROGRAMS\${APP_NAME}\Uninstall.lnk"
 
-   RMDir "$SMPROGRAMS\${SHOES_NAME}"
+   RMDir "$SMPROGRAMS\${APP_NAME}"
    RMDir /r "$INSTDIR\*.*"
    RMDir "$INSTDIR"
    
    ${unregisterExtension} ".shy" "Shoes Application"
    ${un.EnvVarUpdate} $0 "PATH" "R" HKLM $INSTDIR
 
-   DeleteRegKey ${SHOES_UNINST_ROOT_KEY} "${SHOES_UNINST_KEY}"
-   DeleteRegKey HKLM "${SHOES_INST_KEY}"
+   DeleteRegKey ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}"
+   DeleteRegKey HKLM "${APP_INST_KEY}"
    SetAutoClose true
    StrCpy $UninstallerHasFinished true
 SectionEnd

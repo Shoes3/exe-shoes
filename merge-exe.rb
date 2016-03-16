@@ -16,6 +16,10 @@ module PackShoes
   end
   
   def PackShoes.merge_exe opts
+    # setup defaults if not in the opts
+    opts['publisher'] = 'shoerb' unless opts['publisher']
+    opts['website'] = 'http://shoesrb.com/' unless opts['website']
+    opts['hkey_org'] = 'Hackety.org' unless opts['hkey_org']
     toplevel = []
     Dir.chdir(DIR) do
       Dir.glob('*') {|f| toplevel << f}
@@ -135,8 +139,13 @@ module PackShoes
       end
     end
     newn = File.open("#{packdir}/nsis/#{opts['app_name']}.nsi", 'w')
-    rewrite newn, "#{packdir}/nsis/base.nsi", {'APPNAME' => opts['app_name'],
-      'WINVERSION' => opts['app_version']}
+    rewrite newn, "#{packdir}/nsis/base.nsi", {
+      'APPNAME' => opts['app_name'],
+      'WINVERSION' => opts['app_version'],
+      "PUBLISHER" => opts['publisher'],
+      "WEBSITE" => opts['website'],
+      "HKEY_ORG" => opts['hkey_org']
+      }
     newn.close
     Dir.chdir("#{packdir}/nsis") do |p|
       system "\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi\""

@@ -1,5 +1,5 @@
 app_name: Ytm
-app_version: 2
+app_version: 'Demo'
 app_loc: C:/Projects/exe-shoes/ytm/
 app_start: ytm.rb
 app_png: ytm.png
