@@ -7,6 +7,10 @@ app_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 app_installer_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 installer_sidebar_bmp: E:/icons/ytm/installer-1.bmp
 installer_header_bmp: E:/icons/ytm/installer-2.bmp
+publisher: 'YTM Corp Inc'
+website: 'https://github.com/Shoes3/shoes3'
+hkey_org: 'mvmanila.com'
+license: C:/Projects/exe-shoes/ytm/Ytm.license
 include_exts:
  - ftsearch
  - chipmunk

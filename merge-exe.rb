@@ -33,6 +33,13 @@ module PackShoes
     (toplevel-exclude).each do |p|
       cp_r File.join(DIR, p), packdir
     end
+    # do the license struff
+    licf = File.open("#{packdir}/COPYING.txt", 'w')
+    if opts['license'] && File.exist?(opts['license'])
+      IO.foreach(opts['license']) {|ln| licf.puts ln}
+    end
+    IO.foreach("#{DIR}/COPYING.txt") {|ln| licf.puts ln}  
+    licf.close
     # we do need some statics for console to work. 
     mkdir_p "#{packdir}/static"
     Dir.glob("#{DIR}/static/icon*.png") {|p| cp p, "#{packdir}/static" }

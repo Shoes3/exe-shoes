@@ -47,11 +47,10 @@ ENV['vars'] and Constants you'll find in Shoes. Like DIR and without showing the
 The **sample** just loads ytm.yaml and calls the Shoes module function
 PackShoes::merge_exe 
 
-Modify pack.rb to load the .yaml file for your app.  The .yaml for the example
-ytm is 
+Modify pack.rb to load the .yaml file for your app.  The .yaml for the example is 
 ```
 app_name: Ytm
-app_version: 2
+app_version: 'Demo'
 app_loc: C:/Projects/exe-shoes/ytm/
 app_start: ytm.rb
 app_png: ytm.png
@@ -59,6 +58,10 @@ app_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 app_installer_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 installer_sidebar_bmp: E:/icons/ytm/installer-1.bmp
 installer_header_bmp: E:/icons/ytm/installer-2.bmp
+publisher: 'YTM Corp Inc'
+website: 'https://github.com/Shoes3/shoes3'
+hkey_org: 'mvmanila.com'
+license: C:/Projects/exe-shoes/ytm/Ytm.license
 include_exts:
  - ftsearch
  - chipmunk
@@ -67,9 +70,9 @@ include_gems:
  - nokogiri-1.6.7.1-x86-mingw32
  - ffi-1.9.10-x86-mingw32
  - rubyserial-0.2.4
-
- ```
- This just a demo!  
+```
+ Remember - This just a demo!  
+ 
  app_loc: is where your app to package is and app_start: is the starting script
  in app_loc. app_png is the Shoes icon (if you need it) 
  You certainly want your own Windows icon (.ico) for the your app app_ico: is
