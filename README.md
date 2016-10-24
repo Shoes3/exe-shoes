@@ -19,10 +19,10 @@ probably doesn't do what you want.
 * You need Shoes 3.3.1 (r2480 or newer) installed on your Windows machine doing the 
   packaging
 * You need NSIS Unicode installed on your Windows machine. Version 2.45.6 is good
-  but can be hard to find. [http://shoes.mvmanila.com/public/shoesdeps/mingw/nsis-2.46.5-Unicode-setup.exe
-](I've got a copy.) 
+  but can be hard to find. (I've got a copy.)[http://shoes.mvmanila.com/public/shoesdeps/mingw/nsis-2.46.5-Unicode-setup.exe
+]
   Please use NSIS Unicode if you value your users. 
-* You need [http://www.angusj.com/resourcehacker](Resource Hacker) or some way
+* You need (Resource Hacker)[http://www.angusj.com/resourcehacker] or some way
   to set the icon of an exe
 * Must be willing to learn enough about NSIS packaging and accept it's rules.
 * Must be willing to use the Windows commandline (or the msys commandline)
