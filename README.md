@@ -16,11 +16,10 @@ probably doesn't do what you want.
 
 ## Requirements 
 
-* You need Shoes 3.3.1 (r2480 or newer) installed on your Windows machine doing the 
+* You need Shoes 3.3.1 ,r2480 or newer installed on your Windows machine doing the 
   packaging
 * You need NSIS Unicode installed on your Windows machine. Version 2.45.6 is good
-  but can be hard to find. (I've got a copy.)[http://shoes.mvmanila.com/public/shoesdeps/mingw/nsis-2.46.5-Unicode-setup.exe
-]
+  but can be hard to find. (I've got a copy.)[http://shoes.mvmanila.com/public/shoesdeps/mingw/nsis-2.46.5-Unicode-setup.exe]
   Please use NSIS Unicode if you value your users. 
 * You need (Resource Hacker)[http://www.angusj.com/resourcehacker] or some way
   to set the icon of an exe
