@@ -82,7 +82,7 @@ module PackShoes
     logf.close
     # copy/remove gems - tricksy - pay attention
     # remove the Shoes built-in gems if not in the list 
-    incl_gems = opts['include_gems']
+    incl_gems = opts['include_gems'] || []
     rm_gems = []
     Dir.glob("#{packdir}/lib/ruby/gems/#{rbmm}.0/specifications/*gemspec") do |p|
       gem = File.basename(p, '.gemspec')
