@@ -64,7 +64,7 @@ module PackShoes
     rm_rf "#{packdir}/lib/exerb"
     rm_rf "#{packdir}/lib/gtk-2.0" if File.exist? "#{packdir}/lib/gtk-2.0"
     # remove unreachable code in packdir/lib/shoes/ like help, app-package ...
-    ['cobbler', 'debugger', 'irb', 'pack', 'app_package', 'packshoes',
+    ['cobbler', 'debugger', 'shoes_irb', 'pack', 'app_package', 'packshoes',
       'remote_debugger', 'winject', 'envgem'].each {|f| rm "#{packdir}/lib/shoes/#{f}.rb" }
   
     # copy app contents (file/dir at a time)
