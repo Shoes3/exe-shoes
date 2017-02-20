@@ -1,6 +1,6 @@
-Shoes.app(title: "Package app in exe", width: 600, height: 550, resizable: false ) do
 require("yaml")
-	
+
+Shoes.app(title: "Package app in exe", width: 600, height: 550, resizable: false) do
 	PWD = Dir.pwd
 	@offside, @edit_box_height = 15, 29 ### box dimmensions
 	@options = ["app_name", "app_version", "app_startmenu", "publisher", "website", "app_loc", "app_start", "app_ico", "include_gems", "installer_sidebar_bmp", "installer_header_bmp", "app_installer_ico", "hkey_org", "license" ]
