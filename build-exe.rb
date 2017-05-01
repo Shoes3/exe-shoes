@@ -32,7 +32,8 @@ Shoes.app(title: "Package app in exe", width: 600, height: 550, resizable: false
 	def page1
 		@page = 1
 		subtitle "Aplication properties", align: "center"
-		stack left: 128, top: 70, width: 0.5, height: 400 do
+#		stack left: 128, top: 70, width: 0.5, height: 400 do
+		stack width: 0.8, height: 400 do
 			background darkgray
 			border black, strokewidth: 2
 			para "App name", margin_left: 32, margin_top: 20
