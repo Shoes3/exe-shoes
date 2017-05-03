@@ -1,10 +1,17 @@
 require("yaml")
+require 'fileutils'
 
-Shoes.app(title: "Package app in exe", width: 600, height: 550, resizable: false) do
+Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: false) do
 	PWD = Dir.pwd
 	@offside, @edit_box_height = 15, 29 ### box dimmensions
-	@options = ["app_name", "app_version", "app_startmenu", "publisher", "website", "app_loc", "app_start", "app_ico", "include_gems", "installer_sidebar_bmp", "installer_header_bmp", "app_installer_ico", "hkey_org", "license" ]
-	@ytm = Hash[@options.map {|x| [x, ""]}]
+	#@options = ["app_name", "app_version", "app_startmenu", "publisher", "website",
+  #   "app_loc", "app_start", "app_ico", "include_gems", "installer_sidebar_bmp",
+  #   "installer_header_bmp", "app_installer_ico", "hkey_org", "license" ]
+	@options = ["app_name", "app_version", "publisher", "website",
+     "app_loc", "app_start", "app_ico", "include_gems", "installer_sidebar_bmp",
+     "installer_header_bmp", "app_installer_ico", "hkey_org", "license" ]
+	#@ytm = Hash[@options.map {|x| [x, ""]}]
+	@values = Hash[@options.map {|x| [x, ""]}]
 	background dimgray
 	def get_file box, marg
 		flow do
@@ -31,48 +38,85 @@ Shoes.app(title: "Package app in exe", width: 600, height: 550, resizable: false
 		
 	def page1
 		@page = 1
-		subtitle "Aplication properties", align: "center"
+		subtitle "Application properties", align: "center"
 #		stack left: 128, top: 70, width: 0.5, height: 400 do
 		stack width: 0.8, height: 400 do
 			background darkgray
 			border black, strokewidth: 2
 			para "App name", margin_left: 32, margin_top: 20
-			@app_name = edit_box "used as exe and dir name", height: @edit_box_height, margin_left: 32
-			(para "Application version").style(margin_top: @offside, margin_left: 32)
-			@app_version = edit_box "0.99",  height: @edit_box_height, margin_left: 32
-			(para "Start Menu folder name").style(margin_top: @offside, margin_left: 32)
-			@app_startmenu = edit_box "Can be the same as App name", height: @edit_box_height, margin_left: 32
+			@app_name = edit_box @values['app_name'],  height: @edit_box_height, margin_left: 32,
+          tooltip: "This and the SubName string will be used to name the installer File " do
+        @values['app_name'] = @app_name.text
+      end
+			(para "Application Subname").style(margin_top: @offside, margin_left: 32)
+			@app_version = edit_box @values['app_version'],  height: @edit_box_height, margin_left: 32,
+          tooltip: "This is a string that is appended to App Name to name the installer file a hypthen will will be inserted" do
+        @values['app_version'] = @app_version.text
+      end
+      
+#			(para "Start Menu folder name").style(margin_top: @offside, margin_left: 32)
+#			@app_startmenu = edit_box "Can be the same as App name", height: @edit_box_height, margin_left: 32
 			(para "Publisher name").style(margin_top: @offside, margin_left: 32)
-			@publisher =  edit_box "", height: @edit_box_height, margin_left: 32
+      if !@values['publisher']
+        @values['publisher'] = "My name here"
+      end
+			@publisher =  edit_box @values['publisher'], height: @edit_box_height, margin_left: 32,
+          tooltip: "Your compony or org name" do
+          @values['publisher'] = @publisher.text
+      end
+      
 			(para "Website").style(margin_top: @offside, margin_left: 32)
-			@website = edit_box "", height: @edit_box_height, margin_left: 32
+			@website = edit_box @values['website'], height: @edit_box_height, margin_left: 32,
+          tooltip: "url to your website" do
+        @values['website'] = @website.text
+      end
 		end
 	end
 	
 	def page2
 		@page = 2
-		subtitle "Aplication source", align: "center"
+		subtitle "Application source", align: "center"
 		stack left: 20, top: 70, width: 0.9, height: 280 do
 			background darkgray
 			border black, strokewidth: 2
 			(para "Application folder").style(margin_top: @offside, margin_left: 32)
 			flow do
-				@app_loc = edit_box "", width: 300, height: @edit_box_height, margin_left: 32
-				button "Select folder" do
-					@app_loc.text = fix_string(ask_open_folder)
-				end
+				@app_loc = edit_box @values['app_loc'], width: 300, height: @edit_box_height, margin_left: 32, 
+          tooltip: "points to the top level folder of your Shoes app", state: "disabled"  
+				#button "Select folder" do
+				#	@app_loc.text = fix_string(ask_open_folder)
+        #  @values['app_loc'] = @app_loc.text
+				#end
 			end
 			(para "Starting script name").style(margin_top: @offside, margin_left: 32)
-			@app_begin = edit_box "main.rb", width: 300, height: @edit_box_height, margin_left: 32
+      flow do
+			  @app_start = edit_box @values['app_start'], width: 300, height: @edit_box_height, margin_left: 32,
+            tooltip: "The first script to run for your Shoes app"
+        button "Select .rb file" do
+          longfn = ask_open_file
+          @app_start.text = File.basename(longfn)
+          @values['app_start'] = @app_start.text
+          appdir = File.dirname(longfn)
+          @app_loc.text = appdir
+          @values['app_loc'] = appdir
+        end
+      end
 			(para "Exe icon (.ico)").style(margin_top: @offside, margin_left: 32)
-			@app_icon = get_file @app_icon, 32
-			
+			#@app_icon = get_file @app_icon, 32
+			flow do
+			  @app_icon = edit_box @values['app_icon'], width: 300, height: @edit_box_height, margin_left: 32,
+            tooltip: "The Window app icon for your Shoes app"
+        button "Select .ico" do
+          @app_icon.text = fix_string(ask_open_file)
+          @values['app_ico'] = @app_icon.text
+        end
+      end
 		end
 	end
 	
 	def page3
 		@page = 3
-		subtitle "Additional gems", align: "center"
+		subtitle "Gems to include. And subgems!", align: "center"
 		@gems = stack left: 120, top: 70, width: 300 do
 			background darkgray
 			border black, strokewidth: 2
@@ -90,7 +134,7 @@ Shoes.app(title: "Package app in exe", width: 600, height: 550, resizable: false
 	
 	def page4 
 		@page = 4
-		subtitle "Wizard settings", align: "center"
+		subtitle "Installer settings", align: "center"
 		stack left: 40, top: 70, width: 0.81, height: 400 do
 			background darkgray
 			border black, strokewidth: 2
@@ -111,11 +155,11 @@ Shoes.app(title: "Package app in exe", width: 600, height: 550, resizable: false
 	def page5
 		subtitle "Config Summary", align: "center"
 		flow do
-			para @ytm.to_yaml
+			para values.to_yaml
 		end
 		@next.remove
 		button "Save confg" do
-			File.open(ask_save_file, "w") { |f| f.write(@ytm.to_yaml) } 
+			File.open(ask_save_file, "w") { |f| f.write(values.to_yaml) } 
 		end
 		button "Deploy", left: 400 	do
 			#system{"cshoes.exe --ruby PWD/ytm-merge.rb"}
@@ -129,20 +173,24 @@ Shoes.app(title: "Package app in exe", width: 600, height: 550, resizable: false
 	
 	@next = button "Next", left: 500, top: 500 do
 		i=0;
-		[ @app_name, @app_version, @app_startmenu, @publisher, @website, @app_loc, @app_begin, @app_icon, @gems, @setup_side, @setup_head, @setup_icon, @setup_key, @setup_lic ].each do |n|
+#		[ @app_name, @app_version, @app_startmenu, @publisher, @website, @app_loc, @app_begin, 
+#      @app_icon, @gems, @setup_side, @setup_head, @setup_icon, @setup_key, @setup_lic ].each do |n|
+		[ @app_name, @app_version, @publisher, @website, @app_loc, @app_begin, 
+      @app_icon, @gems, @setup_side, @setup_head, @setup_icon, @setup_key, @setup_lic ].each do |n|
 			begin
-				n.nil? || n.text.nil? ? nil : @ytm[@options[i]] = n.text; 
+				n.nil? || n.text.nil? ? nil : @values[@options[i]] = n.text; 
 			rescue
+        puts "rescued #{n.inspect}"
 				@gems = []
 				n.contents[3..-1].each do |c|
 					c.contents[0].checked? ? @gems << c.contents[1].text : nil
 				end
-				@gems.count > 0 ? @ytm[@options[i]] = @gems : @ytm[@options[i]] = nil
+				@gems.count > 0 ? values[@options[i]] = @gems : @values[@options[i]] = nil
 				@gems = nil
 			end
 			i+=1
 		end
-		#debug("ytm is #{@ytm}")
+		#debug("ytm is #{values}")
 		turn_page @page, @pages.length, "up"
 	end
 end
