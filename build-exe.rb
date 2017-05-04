@@ -12,6 +12,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
      "installer_header_bmp", "app_installer_ico", "hkey_org", "license" ]
 	#@ytm = Hash[@options.map {|x| [x, ""]}]
 	@values = Hash[@options.map {|x| [x, ""]}]
+  @values['include_gems'] = []
 	background dimgray
 	def get_file box, marg
 		flow do
@@ -116,14 +117,25 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 	
 	def page3
 		@page = 3
-		subtitle "Gems to include. And subgems!", align: "center"
+		subtitle "Gems to include. Add dependent gems manually!", align: "center"
 		@gems = stack left: 120, top: 70, width: 300 do
 			background darkgray
 			border black, strokewidth: 2
-			para "Add aditional gems", align: "center", margin_top: 20, margin_bottom: 20
+			para "Add gems", align: "center", margin_top: 20, margin_bottom: 20
+      gspec = {}    # not your normal hash, see the check click proc below
 			Gem::Specification.each do |gs|
 				flow margin_left: 50 do
-					check()
+				  c =	check do |s| 
+            g = gspec[s]
+            if s.checked? 
+              puts "add #{g.name}"
+              @values['include_gems'].push(g.name)
+            else
+              puts "delete #{g.name}"
+              @values['include_gems'].delete(g.name)
+            end
+          end
+          gspec[c] = gs        
 					para("#{gs.name}")
 					para("#{gs.version}")
 				end
@@ -134,32 +146,64 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 	
 	def page4 
 		@page = 4
-		subtitle "Installer settings", align: "center"
+		subtitle "NSIS Unique Settings", align: "center"
 		stack left: 40, top: 70, width: 0.81, height: 400 do
 			background darkgray
 			border black, strokewidth: 2
-			(para "Wizard side pic (164 x 309) .bmp").style(margin_top: @offside, margin_left: 20)
-		    @setup_side = get_file @setup_side, 20
-			(para "Wizard header pic (150 x 57) .bmp").style(margin_top: @offside, margin_left: 20)
-			@setup_head = get_file @setup_head, 20
-			(para "Installer icon (.ico)").style(margin_top: @offside, margin_left: 20)
-			@setup_icon = get_file @setup_icon , 20
-			(para "Key").style(margin_top: @offside, margin_left: 20)
-			@setup_key = edit_box "mvmanila.com", width: 200, height: @edit_box_height, margin_left: 20
-			(para "NSIS license (leave it as it is)").style(margin_top: @offside, margin_left: 20)
-			@setup_lic = get_file @setup_head, 20
-			@setup_lic.text = "#{PWD}/ytm/Ytm.license"
+			(para "Installer sidebar (164 x 309) .bmp").style(margin_top: @offside, margin_left: 20)
+      #@setup_side = get_file @setup_side, 20
+      flow do
+			  @setup_side = edit_box @values['installer_sidebar_bmp'], width: 300, height: @edit_box_height,
+          margin_left: 20
+			  button "Select file" do
+          @setup_side.text = ask_open_file
+          @values['installer_sidebar_bmp'] = @setup_side.text
+			  end
+		  end
+			(para "Installer header pic (150 x 57) .bmp").style(margin_top: @offside, margin_left: 20)
+			#@setup_head = get_file @setup_head, 20
+      flow do
+			  @setup_head = edit_box @values['installer_header_bmp'], width: 300, height: @edit_box_height,
+          margin_left: 20
+			  button "Select file" do
+          @setup_head.text = ask_open_file
+          @values['installer_header_bmp'] = @setup_head.text
+			  end
+		  end
+      (para "Installer's icon (.ico)").style(margin_top: @offside, margin_left: 20)
+			#@setup_icon = get_file @setup_icon , 20
+      flow do
+			  @setup_icon = edit_box @values['app_installer_ico'], width: 300, height: @edit_box_height,
+          margin_left: 20
+			  button "Select file" do
+          @setup_icon.text = ask_open_file
+          @values['app_installer_ico'] = @setup_icon.text
+			  end
+		  end
+      (para "hkey_org").style(margin_top: @offside, margin_left: 20)
+			#@setup_key = edit_box "mvmanila.com", width: 200, height: @edit_box_height, margin_left: 20
+      if ! @values['hhey_org'] 
+        @values['kkey_org'] = "mvmanila.com"
+      end
+			@setup_key = edit_box @values['hkey_org'], width: 200, height: @edit_box_height, margin_left: 20,
+          tooltip: "don't change this unless you love pain. Just saying. Don't " do
+        edit_box @values['hkey_org'] = @setup_key.text
+      end
+			(para "Append file to License").style(margin_top: @offside, margin_left: 20)
+			#@setup_lic = get_file @setup_head, 20
+			#@setup_lic.text = "#{PWD}/ytm/Ytm.license"
+      
 		end
 	end
 	
 	def page5
 		subtitle "Config Summary", align: "center"
 		flow do
-			para values.to_yaml
+			para @values.to_yaml
 		end
 		@next.remove
 		button "Save confg" do
-			File.open(ask_save_file, "w") { |f| f.write(values.to_yaml) } 
+			File.open(ask_save_file, "w") { |f| f.write(@values.to_yaml) } 
 		end
 		button "Deploy", left: 400 	do
 			#system{"cshoes.exe --ruby PWD/ytm-merge.rb"}
