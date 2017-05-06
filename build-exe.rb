@@ -14,6 +14,23 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 	@values = Hash[@options.map {|x| [x, ""]}]
   @values['include_gems'] = []
 	background dimgray
+  @load_btn = button "Load yaml", left: 500, top: 100, tooltip: "existing yaml configuration" do
+    fl = ask_open_file
+    if fl
+      opts = YAML.load_file(fl)
+      opts.each {|k, v| @values[k] = v}
+      # because shoes/script has already got page1 widgets on screen we need to change them
+      # sigh. 
+      @app_name.text = @values['app_name']
+      @app_version.text = @values['app_version']
+      @publisher.text = @values['publisher']
+      @website.text = @values['website']
+      # UGLY, UGLY: 
+      $stderr.puts "gems: #{@values['include_gems']}"
+    end
+  end
+  
+  
 	def get_file box, marg
 		flow do
 			box = edit_box "", width: 300, height: @edit_box_height, margin_left: marg
@@ -68,7 +85,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
       
 			(para "Website").style(margin_top: @offside, margin_left: 32)
 			@website = edit_box @values['website'], height: @edit_box_height, margin_left: 32,
-          tooltip: "url to your website" do
+          width: 0.8, tooltip: "url to your website" do
         @values['website'] = @website.text
       end
 		end
@@ -105,7 +122,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 			(para "Exe icon (.ico)").style(margin_top: @offside, margin_left: 32)
 			#@app_icon = get_file @app_icon, 32
 			flow do
-			  @app_icon = edit_box @values['app_icon'], width: 300, height: @edit_box_height, margin_left: 32,
+			  @app_icon = edit_box @values['app_ico'], width: 300, height: @edit_box_height, margin_left: 32,
             tooltip: "The Window app icon for your Shoes app"
         button "Select .ico" do
           @app_icon.text = fix_string(ask_open_file)
@@ -117,31 +134,42 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 	
 	def page3
 		@page = 3
-		subtitle "Gems to include. Add dependent gems manually!", align: "center"
+		subtitle "Gems to include", align: "center"
 		@gems = stack left: 120, top: 70, width: 300 do
 			background darkgray
 			border black, strokewidth: 2
 			para "Add gems", align: "center", margin_top: 20, margin_bottom: 20
       gspec = {}    # not your normal hash, see the check click proc below
-			Gem::Specification.each do |gs|
+			#Gem::Specification.each do |gs|
+      Dir.glob("#{DIR}/lib/ruby/gems/2.2.0/specifications/*.gemspec") do |gs_fl|
+        #gs_full = "#{gs.name}-#{gs.version}"
+        gs_full = File.basename(gs_fl, ".gemspec")
+        #$stderr.puts "basename: #{gs_full}"
 				flow margin_left: 50 do
 				  c =	check do |s| 
+            # user clicked proc
             g = gspec[s]
             if s.checked? 
-              puts "add #{g.name}"
-              @values['include_gems'].push(g.name)
+              $stderr.puts "add #{g.name}"
+              @values['include_gems'].push(gs_full)
             else
-              puts "delete #{g.name}"
-              @values['include_gems'].delete(g.name)
+              $stderr.puts "delete #{g.name}"
+              @values['include_gems'].delete(gs_full)
             end
           end
-          gspec[c] = gs        
-					para("#{gs.name}")
-					para("#{gs.version}")
+          gspec[c] = gs_full     
+					para("#{gs_full}")
+          idx = @values['include_gems'].find_index(gs_full) 
+          if idx 
+            $stderr.puts "check #{gs_full}: #{idx}" 
+            c.checked = true
+          end
 				end
 			end			
 		end	
-		start { @gems.style( height: @gems.height + 20) }
+		start do 
+      @gems.style( height: @gems.height + 20)
+    end
 	end
 	
 	def page4 
@@ -189,10 +217,17 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
           tooltip: "don't change this unless you love pain. Just saying. Don't " do
         edit_box @values['hkey_org'] = @setup_key.text
       end
-			(para "Append file to License").style(margin_top: @offside, margin_left: 20)
+			(para "Append to License").style(margin_top: @offside, margin_left: 20)
 			#@setup_lic = get_file @setup_head, 20
 			#@setup_lic.text = "#{PWD}/ytm/Ytm.license"
-      
+      flow do
+        @setup_lic = edit_box @values['license'], width: 300, height: @edit_box_height,margin_left: 20,
+          tooltip: "append the contents to the Shoes LICSENSE.txt file"
+        button "Select file" do
+          @setup_lic.text = ask_open_file
+          @values['license'] = @setup_lic.text
+        end
+      end
 		end
 	end
 	
@@ -224,13 +259,13 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 			begin
 				n.nil? || n.text.nil? ? nil : @values[@options[i]] = n.text; 
 			rescue
-        puts "rescued #{n.inspect}"
-				@gems = []
-				n.contents[3..-1].each do |c|
-					c.contents[0].checked? ? @gems << c.contents[1].text : nil
-				end
-				@gems.count > 0 ? values[@options[i]] = @gems : @values[@options[i]] = nil
-				@gems = nil
+        #$stderr.puts "rescued #{n.inspect}"
+				#@gems = []
+				#n.contents[3..-1].each do |c|
+				#	c.contents[0].checked? ? @gems << c.contents[1].text : nil
+				#end
+				#@gems.count > 0 ? values[@options[i]] = @gems : @values[@options[i]] = nil
+				#@gems = nil
 			end
 			i+=1
 		end
