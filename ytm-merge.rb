@@ -7,7 +7,7 @@ home = ENV['HOME']
 appdata =   ENV['LOCALAPPDATA']
 appdata  =   ENV['APPDATA'] if ! appdata
 GEMS_DIR = File.join(appdata.tr('\\','\/'), 'Shoes','+gem')
-puts "DIR = #{DIR}"
-puts "GEMS_DIR = #{GEMS_DIR}"
-puts "Here = #{here}"
+$stderr.puts "DIR = #{DIR}"
+$stderr.puts "GEMS_DIR = #{GEMS_DIR}"
+$stderr.puts "Here = #{here}"
 PackShoes::merge_exe opts

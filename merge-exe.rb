@@ -46,20 +46,7 @@ module PackShoes
     if opts['app_png']
       cp "#{opts['app_loc']}/#{opts['app_png']}", "#{packdir}/static/app-icon.png"
     end
-    # remove chipmonk and ftsearch unless requested
     rbmm = RUBY_VERSION[/\d.\d/].to_str
-    exts = opts['include_exts'] # returns []
-    if  !exts || ! exts.include?('ftsearch')
-      puts "removing ftsearchrt.so"
-      rm "#{packdir}/lib/ruby/#{rbmm}.0/i386-mingw32/ftsearchrt.so" 
-      rm_rf "#{packdir}/lib/shoes/help.rb"
-      rm_rf "#{packdir}/lib/shoes/search.rb"
-    end
-    if  !exts || ! exts.include?('chipmunk')
-      puts "removing chipmunk"
-      rm "#{packdir}/lib/ruby/#{rbmm}.0/i386-mingw32/chipmunk.so"
-      rm "#{packdir}/lib/shoes/chipmunk.rb"
-    end
     # get rid of some things in lib
     rm_rf "#{packdir}/lib/exerb"
     rm_rf "#{packdir}/lib/gtk-2.0" if File.exist? "#{packdir}/lib/gtk-2.0"
@@ -87,7 +74,7 @@ module PackShoes
     Dir.glob("#{packdir}/lib/ruby/gems/#{rbmm}.0/specifications/*gemspec") do |p|
       gem = File.basename(p, '.gemspec')
       if incl_gems.include?(gem)
-        puts "Keeping Shoes gem: #{gem}"
+        $stderr.puts "Keeping Shoes gem: #{gem}"
         incl_gems.delete(gem)
       else
         rm_gems << gem
@@ -95,29 +82,29 @@ module PackShoes
     end
     sgpath = "#{packdir}/lib/ruby/gems/#{rbmm}.0"
     # sqlite is a special case so delete it differently - trickery
-    if !incl_gems.include?('sqlite3')
-      spec = Dir.glob("#{sgpath}/specifications/default/sqlite3*.gemspec")
-      rm spec[0]
-      rm_gems << File.basename(spec[0],'.gemspec')
-    else
-      incl_gems.delete("sglite3")
-    end
+    #if !incl_gems.include?('sqlite3')
+    #  spec = Dir.glob("#{sgpath}/specifications/default/sqlite3*.gemspec")
+    #  rm spec[0]
+    #  rm_gems << File.basename(spec[0],'.gemspec')
+    #else
+    #  incl_gems.delete("sglite3")
+    #end
     rm_gems.each do |g|
-      puts "Deleting #{g}"
+      $stderr.puts "Deleting #{g}"
       rm_rf "#{sgpath}/specifications/#{g}.gemspec"
       rm_rf "#{sgpath}/extensions/x86-mingw32/#{rbmm}.0/#{g}"
-     rm_rf "#{sgpath}/gems/#{g}"
+      rm_rf "#{sgpath}/gems/#{g}"
     end
 
     # copy requested gems from AppData\Local\shoes\+gems aka GEMS_DIR
-    incl_gems.delete('sqlite3') if incl_gems.include?('sqlite3')
+    #incl_gems.delete('sqlite3') if incl_gems.include?('sqlite3')
     incl_gems.each do |name| 
-      puts "Copy #{name}"
+      $stderr.puts "Copy #{name}"
       cp "#{GEMS_DIR}/specifications/#{name}.gemspec", "#{sgpath}/specifications"
       cp_r "#{GEMS_DIR}/gems/#{name}", "#{sgpath}/gems"
     end
 
-    puts "make_installer"
+    $stderr.puts "make_installer"
 
     mkdir_p "pkg"
     #cp_r "VERSION.txt", "#{packdir}/VERSION.txt"
@@ -142,7 +129,7 @@ module PackShoes
       if system(cmdl)
         rm 'shoes.exe' if File.exist?("#{opts['app_name']}.exe")
       else 
-        puts "FAIL: #{$?} #{cmdl}"
+        $stderr.puts "FAIL: #{$?} #{cmdl}"
       end
     end
     newn = File.open("#{packdir}/nsis/#{opts['app_name']}.nsi", 'w')

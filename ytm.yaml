@@ -1,4 +1,5 @@
 app_name: Ytm
+app_name: Ytm
 app_version: 'Demo'
 app_loc: C:/Projects/exe-shoes/ytm/
 app_start: ytm.rb
@@ -15,4 +16,4 @@ include_gems:
  - sqlite3-1.3.13-x86-mingw32
  - nokogiri-1.6.7.1-x86-mingw32
  - ffi-1.9.18-x86-mingw32
- - rubyserial-0.2.4
+ - rubyserial-0.4.0

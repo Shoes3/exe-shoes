@@ -13,6 +13,12 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 	#@ytm = Hash[@options.map {|x| [x, ""]}]
 	@values = Hash[@options.map {|x| [x, ""]}]
   @values['include_gems'] = []
+  rbmm = RUBY_VERSION[/\d.\d/].to_str
+  appdata =  ENV['LOCALAPPDATA']
+  appdata =  ENV['APPDATA'] if ! appdata
+  GEMS_DIR = File.join(appdata.tr('\\','\/'), 'Shoes','+gem')
+  @gs_filep = {} # hash of 'gem.name-version' => filesystem .gemspec location
+  
 	background dimgray
   @load_btn = button "Load yaml", left: 500, top: 100, tooltip: "existing yaml configuration" do
     fl = ask_open_file
@@ -25,11 +31,21 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
       @app_version.text = @values['app_version']
       @publisher.text = @values['publisher']
       @website.text = @values['website']
-      # UGLY, UGLY: 
       $stderr.puts "gems: #{@values['include_gems']}"
+      # strip off '-x86-mingw32' 
+      @values['include_gems'].each do |g|
+        g.gsub!(/\-x86\-mingw32/, '')
+      end
+      $stderr.puts "use this: #{@values['include_gems']}"
     end
   end
   
+  def gsfl_add gspath
+    fn = File.basename(gspath, ".gemspec")
+    newfn = fn.gsub(/\-x86-mingw32/, '')
+    @gs_filep[newfn] = gspath
+    #$stderr.puts "hash this: #{newfn} => #{gspath}"
+  end
   
 	def get_file box, marg
 		flow do
@@ -139,11 +155,17 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 			background darkgray
 			border black, strokewidth: 2
 			para "Add gems", align: "center", margin_top: 20, margin_bottom: 20
+      rbmm = RUBY_VERSION[/\d.\d/].to_str
       gspec = {}    # not your normal hash, see the check click proc below
-			#Gem::Specification.each do |gs|
-      Dir.glob("#{DIR}/lib/ruby/gems/2.2.0/specifications/*.gemspec") do |gs_fl|
-        #gs_full = "#{gs.name}-#{gs.version}"
-        gs_full = File.basename(gs_fl, ".gemspec")
+      Dir.glob("#{DIR}/lib/ruby/gems/#{rbmm}.0/specifications/*.gemspec") do |gs_fl|
+        gsfl_add gs_fl
+      end
+      Dir.glob("#{GEMS_DIR}/specifications/*gemspec") do |gs_fl|
+        gsfl_add gs_fl
+      end
+      Gem::Specification.each do |gs|        
+        gs_full = "#{gs.name}-#{gs.version}"
+        #gs_full = File.basename(gs_fl, ".gemspec")
         #$stderr.puts "basename: #{gs_full}"
 				flow margin_left: 50 do
 				  c =	check do |s| 
@@ -233,15 +255,37 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 	
 	def page5
 		subtitle "Config Summary", align: "center"
+    # need to clean up/rewrite the gem names vs path to .gemspec
+    # args depends on what merge-exe.rb deals with - Subject to change. 
+    nv = @values.dup
+    nv['include_gems'] = []
+    @values['include_gems'].each do |g|
+      path = @gs_filep[g]
+      if path
+        $stderr.puts "looking for #{g} found #{path}"
+        nv['include_gems'] << File.basename(path, '.gemspec')
+      else
+        $stderr.puts "Gem not available #{g}"
+      end
+    end
 		flow do
-			para @values.to_yaml
+			para nv.to_yaml
 		end
 		@next.remove
 		button "Save confg" do
-			File.open(ask_save_file, "w") { |f| f.write(@values.to_yaml) } 
+			File.open(ask_save_file, "w") { |f| f.write(nv.to_yaml) } 
 		end
-		button "Deploy", left: 400 	do
-			#system{"cshoes.exe --ruby PWD/ytm-merge.rb"}
+		@go_btn = button "Create .exe", left: 400 	do
+      require_relative 'merge-exe'
+      @go_btn.state = "disabled"
+      Shoes.terminal
+      # clever people could create a new shoes window/app (different OS thread)
+      # with a progess bar in it, maybe a status message area and pass something
+      # into an optional arg to Package::merge_exe that it can call to update the
+      # the progress widget and the status text. Like the Gem install does. 
+      PackShoes::merge_exe nv
+      @go_btn.state = nil #enable button
+      # create a quit button to let user know that it's time to end this.
 		end
 	end
 	

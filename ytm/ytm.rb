@@ -9,7 +9,6 @@
 require 'date'
 require 'csv'
 require 'net/http'
-require 'rubyserial'
 
 $dateToday = DateTime.now()
 #$dateTodayMDY = "#{$dateToday.month}/#{$dateToday.day}/#{$dateToday.year}"
@@ -533,3 +532,4 @@ $secFile.load
 
 # the next line fires up the GUI, calling the "/" url which maps to the setup
 Shoes.app :width => 600, :height => 700, :margin => 5
+=> 700, :margin => 5
