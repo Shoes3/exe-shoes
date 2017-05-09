@@ -1,7 +1,7 @@
 require("yaml")
 require 'fileutils'
 
-Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: false) do
+Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: true) do
 	PWD = Dir.pwd
 	@offside, @edit_box_height = 15, 29 ### box dimmensions
 	#@options = ["app_name", "app_version", "app_startmenu", "publisher", "website",
@@ -20,7 +20,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
   @gs_filep = {} # hash of 'gem.name-version' => filesystem .gemspec location
   
 	background dimgray
-  @load_btn = button "Load yaml", left: 500, top: 100, tooltip: "existing yaml configuration" do
+  def load_yaml 
     fl = ask_open_file
     if fl
       opts = YAML.load_file(fl)
@@ -244,7 +244,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 			#@setup_lic.text = "#{PWD}/ytm/Ytm.license"
       flow do
         @setup_lic = edit_box @values['license'], width: 300, height: @edit_box_height,margin_left: 20,
-          tooltip: "append the contents to the Shoes LICSENSE.txt file"
+          tooltip: "prepend the contents to the Shoes LICSENSE.txt file"
         button "Select file" do
           @setup_lic.text = ask_open_file
           @values['license'] = @setup_lic.text
@@ -254,6 +254,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 	end
 	
 	def page5
+    @page = 5
 		subtitle "Config Summary", align: "center"
     # need to clean up/rewrite the gem names vs path to .gemspec
     # args depends on what merge-exe.rb deals with - Subject to change. 
@@ -271,7 +272,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
 		flow do
 			para nv.to_yaml
 		end
-		@next.remove
+		#@next.remove
 		button "Save confg" do
 			File.open(ask_save_file, "w") { |f| f.write(nv.to_yaml) } 
 		end
@@ -284,36 +285,56 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: fal
       # into an optional arg to Package::merge_exe that it can call to update the
       # the progress widget and the status text. Like the Gem install does. 
       PackShoes::merge_exe nv
-      @go_btn.state = nil #enable button
+      @go_btn.state = nil # nil enables button - legacy
       # create a quit button to let user know that it's time to end this.
 		end
 	end
 	
+  # create the outer gui - button bar, panel for page(n) content
 	@pages = [ method(:page1),method(:page2), method(:page3), method(:page4), method(:page5) ]
-	@frame = flow margin: 30 do
-		@pages[0].call
-	end
-	
-	@next = button "Next", left: 500, top: 500 do
-		i=0;
-#		[ @app_name, @app_version, @app_startmenu, @publisher, @website, @app_loc, @app_begin, 
-#      @app_icon, @gems, @setup_side, @setup_head, @setup_icon, @setup_key, @setup_lic ].each do |n|
-		[ @app_name, @app_version, @publisher, @website, @app_loc, @app_begin, 
-      @app_icon, @gems, @setup_side, @setup_head, @setup_icon, @setup_key, @setup_lic ].each do |n|
-			begin
-				n.nil? || n.text.nil? ? nil : @values[@options[i]] = n.text; 
-			rescue
-        #$stderr.puts "rescued #{n.inspect}"
-				#@gems = []
-				#n.contents[3..-1].each do |c|
-				#	c.contents[0].checked? ? @gems << c.contents[1].text : nil
-				#end
-				#@gems.count > 0 ? values[@options[i]] = @gems : @values[@options[i]] = nil
-				#@gems = nil
-			end
-			i+=1
-		end
-		#debug("ytm is #{values}")
-		turn_page @page, @pages.length, "up"
-	end
+  stack width: 0.9 do
+    @btnbar = flow margin: 30 do
+      @load_btn = button "Load yaml", tooltip: "existing yaml configuration" do
+        load_yaml
+        #@pages[0].call
+      end
+      button 'Next' do
+        # @page range 1..5 - call index is 0..4
+        np = @page + 1
+        np = @pages.size if np > @pages.size
+        @frame.clear { @pages[np-1].call }
+      end
+      button 'Previous' do
+        # @page range 1..5 - call index is 0..4
+        np = @page - 1
+        np = 1 if np < 1
+        @frame.clear { @pages[np-1].call }
+      end
+    end
+    @frame = flow margin: 0.05, width: 0.9 do
+      @pages[0].call
+    end
+#    @next = button "Next", left: 500, top: 500 do
+#      i=0;
+#  #		[ @app_name, @app_version, @app_startmenu, @publisher, @website, @app_loc, @app_begin, 
+#  #      @app_icon, @gems, @setup_side, @setup_head, @setup_icon, @setup_key, @setup_lic ].each do |n|
+#      [ @app_name, @app_version, @publisher, @website, @app_loc, @app_begin, 
+#        @app_icon, @gems, @setup_side, @setup_head, @setup_icon, @setup_key, @setup_lic ].each do |n|
+#        begin
+#          n.nil? || n.text.nil? ? nil : @values[@options[i]] = n.text; 
+#        rescue
+#          #$stderr.puts "rescued #{n.inspect}"
+#          #@gems = []
+#          #n.contents[3..-1].each do |c|
+#          #	c.contents[0].checked? ? @gems << c.contents[1].text : nil
+#          #end
+#          #@gems.count > 0 ? values[@options[i]] = @gems : @values[@options[i]] = nil
+#          #@gems = nil
+#        end
+#      i+=1
+#      end
+#      #debug("ytm is #{values}")
+#      turn_page @page, @pages.length, "up"
+#    end
+  end
 end
