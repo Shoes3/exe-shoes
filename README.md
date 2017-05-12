@@ -47,12 +47,19 @@ Nothing to be afraid of and we have graphical way to build that yaml you need.
 ## Wizard
 
 Before you get too excited about the GUI wizard, it not __that__ much of a timesaver for
-you and you still need to read the rest of this document and do your testing. 
+you and you still need to read the rest of this document and do your testing. So, fire up Shoes and run the
+`build-exe.rb` script. I'm a command line fan so `$ cshoes.exe path\to\build-exe.rb` but you can do it from 
+the Shoes splash screen if you really want to.
 
 ![wizard](https://cloud.githubusercontent.com/assets/222691/25981983/f88ee538-3695-11e7-993b-9a6eb4ef2593.png)
 
 That's after I pushed the button to load my test ytm.yaml. Yes, you can edit the yaml file
-you have created. 
+you have created. Note: you can hover the cursor over many widgets to get some tooltip reminders.
+
+As described below, you need to pick the gems carefully (and all dependent gems that you choice needs). In the 
+final screen you can save the yaml and use it to create and exe -- that freezes Shoes for many minutes (3 to 5)
+You may also see a button to select your makensis.exe and resourcehacker.exe If those were not installed
+in the default location. 
 
 ## Command Line Usage 
 
