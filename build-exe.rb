@@ -40,6 +40,14 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: tru
     end
   end
   
+  def find_nsis
+    # ask_open_file returns:
+    #  C:\Program Files (x86)\NSIS\Unicode\makensis.exe 
+    # needs to become something like below
+    cmdr = "\"C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe\" -modify  shoes.exe, #{opts['app_name']}.exe, #{winico_path}, icongroup,32512,1033"
+    cmdl = "\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi\""
+  end
+  
   def gsfl_add gspath
     fn = File.basename(gspath, ".gemspec")
     newfn = fn.gsub(/\-x86-mingw32/, '')
