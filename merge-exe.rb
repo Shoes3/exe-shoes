@@ -15,6 +15,17 @@ module PackShoes
     end
   end
   
+  # returns a path that can be used for Windows system() when
+  # the path has spaces in it.  Doesn't help backtick commands - don't do
+  # that. 
+  def PackShoes.exe_esc path
+    if path.index(' ')
+      return "\"#{path}\""
+    else 
+      return path
+    end
+  end
+  
   def PackShoes.merge_exe opts
     # setup defaults if not in the opts
     opts['publisher'] = 'shoerb' unless opts['publisher']
@@ -124,8 +135,9 @@ module PackShoes
     # stuff icon into a new app_name.exe using shoes.exe 
     Dir.chdir(packdir) do |p|
       winico_path = "#{opts['app_ico'].tr('/','\\')}"
-      cmdl = "\"C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe\" -modify  shoes.exe, #{opts['app_name']}.exe, #{winico_path}, icongroup,32512,1033"
-      #puts cmdl
+      #cmdl = "\"C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe\" -modify  shoes.exe, #{opts['app_name']}.exe, #{winico_path}, icongroup,32512,1033"
+      cmdl = "#{exe_esc opts['reshack_loc']} -modify  shoes.exe, #{opts['app_name']}.exe, #{winico_path}, icongroup,32512,1033"
+      $stderr.puts cmdl
       if system(cmdl)
         rm 'shoes.exe' if File.exist?("#{opts['app_name']}.exe")
       else 
@@ -142,7 +154,8 @@ module PackShoes
       }
     newn.close
     Dir.chdir("#{packdir}/nsis") do |p|
-      system "\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi\""
+      #system "\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi\""
+      system "#{exe_esc opts['nsis_loc']} #{opts['app_name']}.nsi"
       Dir.glob('*.exe') { |p| mv p, '../../pkg' }
     end
   end

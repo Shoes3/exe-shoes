@@ -9,7 +9,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: tru
   #   "installer_header_bmp", "app_installer_ico", "hkey_org", "license" ]
 	@options = ["app_name", "app_version", "publisher", "website",
      "app_loc", "app_start", "app_ico", "include_gems", "installer_sidebar_bmp",
-     "installer_header_bmp", "app_installer_ico", "hkey_org", "license" ]
+     "installer_header_bmp", "app_installer_ico", "hkey_org", "license"]
 	#@ytm = Hash[@options.map {|x| [x, ""]}]
 	@values = Hash[@options.map {|x| [x, ""]}]
   @values['include_gems'] = []
@@ -18,7 +18,7 @@ Shoes.app(title: "Package app into exe", width: 600, height: 550, resizable: tru
   appdata =  ENV['APPDATA'] if ! appdata
   GEMS_DIR = File.join(appdata.tr('\\','\/'), 'Shoes','+gem')
   @gs_filep = {} # hash of 'gem.name-version' => filesystem .gemspec location
-  
+
 	background dimgray
   def load_yaml 
     fl = ask_open_file
@@ -273,12 +273,50 @@ Will be shown to the User at install time, so make it pretty"
         #$stderr.puts "Gem not available #{g}"
       end
     end
+    # Find the resource hacker and makensis exe's
+    # A tricky file name to deal with. shell vs ruby on windows with spaces
+    # another trick is in merge.exe
+    #sh_deflt_cmdr = "\"C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe\""
+    sh_deflt_cmdr = "C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe"
+    nv['reshack_loc'] = sh_deflt_cmdr unless nv['reshack_loc']
+    have_rez = File.exist? nv['reshack_loc']
+    $stderr.puts "have_rez: #{nv['reshack_loc']}: #{have_rez}"
+    
+    #sh_deflt_cmdl = "\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\""
+    sh_deflt_cmdl = "C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe"
+    nv['nsis_loc'] = sh_deflt_cmdl unless nv['nsis_loc']
+    have_nsis = File.exist? nv['nsis_loc']
+    $stderr.puts "have nsis #{nv['nsis_loc']}: #{have_nsis}"
     stack do
       flow do 
+        if ! have_rez
+          rezbtn = button "Resource Hacker" do
+            rp = ask_open_file
+            if rp && File.exist?(rp)
+              nv['reshack_loc'] = rp
+              @yaml_dsp.clear { para nv.to_yaml, stroke: white}
+              rezbtn.remove
+            else
+              alert "You must have \"Resource Hacker\" installed, Do not continue!" 
+            end
+          end
+        end
+        if ! have_nsis
+          nsbtn =button "NSIS Unicode" do
+            np = ask_open_file
+            if np && File.exist?(np)
+              nv['nsis_loc'] = np
+              @yaml_dsp.clear { para nv.to_yaml, stroke: white}
+              nsbtn.remove
+            else
+              alert "You must have \"NSIS Unicode\" installed, Do not continue!" 
+            end
+         end
+        end
   		  button "Save confg" do
 	    		File.open(ask_save_file, "w") { |f| f.write(nv.to_yaml) } 
     		end
-  		  @go_btn = button "Create .exe", left: 400 	do
+  		  @go_btn = button "Create .exe" 	do
           require_relative 'merge-exe'
           @go_btn.state = "disabled"
           Shoes.terminal
@@ -294,7 +332,7 @@ Will be shown to the User at install time, so make it pretty"
     end
     # display yaml
     stack do
-		  flow do # depends on yaml having nl's embedded
+		  @yaml_dsp = flow do # depends on yaml having nl's embedded
 			  para nv.to_yaml, stroke: white
 		  end
     end
