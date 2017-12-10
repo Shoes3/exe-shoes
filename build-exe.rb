@@ -2,11 +2,13 @@ Shoes.app(title: "Package app in exe", width: 600, height: 900, resizable: false
 require("yaml")
 	
 	@edit_box_height, @edit_box_width = 28, 250 ### box dimmensions
-	@options = [ 0, 1, 1, 1, 0, 0, 0, 0, 0, 2, 0, 1 ]
-	@output = [ "installer_header", "installer_sidebar_bmp", "installer_header_bmp", "app_installer_ico", "app_name", "app_version", "app_startmenu", "publisher", "website", "app_loc", "app_start", "app_ico", "include_gems" ]
-	@database = [ @installer_header, @setup_side, @setup_head, @setup_icon, @app_name, @app_version, @app_startmenu, @publisher, @website, @app_loc, @app_start, @app_icon, @gems = [] ]
-	@values = Hash[@output.map {|x| [x, ""]}]
-	@values['include_gems']	= []
+	@options = [ 0, 1, 1, 1, 0, 0, 0, 0, 0, 3, -1, 1 ]
+	@output = [ "installer_header", "installer_sidebar_bmp", "installer_header_bmp", "app_installer_ico", "app_name", "app_version", "app_startmenu", "publisher", "website", "app_start", "app_loc", "app_ico", "include_gems" ]
+	@database = []  ##array of all page 1 fields
+	@values = Hash[@output.map {|x| [x, ""]}] ##Hash of all user input taken from the database fields
+	@values['include_gems']	= [] ##defining an array that will hold all gems
+	@must_have = [ 'app_name', 'app_version','app_loc', 'app_start' ] ### @must_have consists of mandatory app options
+	
 	
 	def fix_string str
 		length, count, new_str = str.length, 0, ""
@@ -16,7 +18,7 @@ require("yaml")
 
 	def turn_page direction = "up"
 		direction == "up" ? @page+=1 : @page-=1 
-		( @page > 0 && @page <= @pages.length ) ? ( @frame.clear { @pages[@page-1].call } ) : nil
+		( @page > -1 && @page < @pages.length ) ? ( @frame.clear { @pages[@page].call } ) : nil
 	end
 	
 	def help
@@ -38,13 +40,12 @@ require("yaml")
 		    opts = YAML.load_file(fl)
 		    opts.each {|k, v| @values[k] = v}
 			##updating text on all fields at page1
-			@database.each_with_index { |d, i| d.text = @values["#{@output[i]}"] unless d.kind_of?(Array) }
+			@database.each_with_index { |d, i| d.text = @values["#{@output[i]}"] }
 		end
 	end
 	
 	def prerequisites
-		@must_have = [ @values['app_name'], @values['app_version'], @values['app_loc'], @values['app_start'] ]
-		if @must_have.any? { |m| m.nil? || m == "" } then
+		if @must_have.any? { |m| @values["#{m}"].nil? || @values["#{m}"] == "" } then
 			return 1
 		else 
 			return 0
@@ -52,8 +53,6 @@ require("yaml")
 	end
 	
 	def page1
-		@page = 1
-		
 		subtitle "Wizard & application settings", align: "center", top: 10
 		stack(left: 40, top: 70, width: 500, height: 750) do
 			background darkgray;
@@ -61,6 +60,7 @@ require("yaml")
 			button("Help", left: 350, top: 15, width: 80) { help }
 			button("Load yaml", left: 65, top: 15, width: 80, tooltip: "existing yaml configuration") { load_yaml }
 			line(30,55,470,55)
+			para "* - required field", left: 40, top: 60
 		end
 		stack left: 70, top: 170, width: 460, height: 640, scroll: true do
 			[ "Installer window name",    #### arranged the array vertically to make troubleshooting page 1 managable
@@ -72,17 +72,27 @@ require("yaml")
 			"Start Menu folder name",
 			"Publisher name",
 			"Website",
+			"Starting script",
 			"Application folder",
-			"Starting script name",
 			"Exe icon (.ico)" ].each_with_index do | item, i |
+				req = @must_have.include?(@output[i]) ? "* " : ""
 				flow height: 60 do
-					para item, left: 20, top: 0, height: @edit_box_height
+					para "#{req}#{item}", left: 20, top: 0, height: @edit_box_height
 					@database[i] = edit_line @values[@output[i]], left: 20, top: 28, height: @edit_box_height, width: @edit_box_width do
 						@values[@output[i]]=@database[i].text
 					end
 					case @options[i] ## adding ask_folder, ask_file boxes where needed
 						when 1 then button("Select file", left: 20 + @edit_box_width, top: 27, width: 100) { @database[i].text = fix_string(ask_open_file) }
 						when 2 then button("Select folder", left: 20 + @edit_box_width, top: 27, width: 100) { @database[i].text = fix_string(ask_open_folder) }
+						when 3 then button("Select *.rb file", left: 20 + @edit_box_width, top: 27, width: 100) do
+							 longfn = fix_string(ask_open_file)
+							 @database[i].text = File.basename(longfn)
+							 appdir = File.dirname(longfn)
+							 debug(@app_loc)
+							 @database[10].text = appdir
+							 @values['app_loc'] = appdir
+						end
+						when -1 then @database[i].state = 'disabled'
 					end					
 				end
 			end
@@ -90,7 +100,6 @@ require("yaml")
 	end
 	
 	def page2
-		@page = 2
 		subtitle "Manage gems", align: "center", top: 5
 		stack(left: 40, top: 70, width: 500, height: 750) do
 			background darkgray
@@ -121,13 +130,13 @@ require("yaml")
 			button "Save confg", left: 65, top: 15, width: 80 do
 				File.open(ask_save_file, "w") { |f| f.write(values_exist.to_yaml) }
 			end
-			button "Deploy", left: 350, top: 15, width: 80 do
+			deploy=button "Deploy", left: 350, top: 15, width: 80 do
+				deploy.state = 'disabled'
 				File.open("temp", "w") { |f| f.write(values_exist.to_yaml) }
-				system("cshoes.exe --ruby values-merge.rb temp") 
+				system("cshoes.exe --ruby ytm-merge.rb temp")
 			end
 		end
 		stack left: 70, top: 170, width: 460, height: 640, scroll: true do
-			
 			@values.each do |k, v|
 				if v != "" and v != nil then
 					values_exist["#{k}"] = v
@@ -140,21 +149,22 @@ require("yaml")
 	
 	background dimgray
 	@pages = [ method(:page1),method(:page2), method(:page3) ]
-	@frame = flow(height: 800) { @pages[0].call }
+	@page = 0
+	@frame = flow(height: 800) { @pages[@page].call }
 	
 	@previous = button "Previous", left: 200, top: 85, width: 80 do
 		turn_page "down"
 		@next.show
-		@page == 1 ? @previous.hide : nil
+		@page == 0 ? @previous.hide : nil
 	end
-	start { @previous.hide }
+	start { @previous.hide } ##hiding previous button on page 1
 	@next = button "Next", left: 295, top: 85, width: 80 do
-		if @page == 1 && prerequisites == 1 then
+		if @page == 0 && prerequisites == 1 then
 			alert "One or more required fields are empty!"
 		else
 			turn_page "up"
 			@previous.show
-			@page == @pages.length ? @next.hide : nil
+			@page == @pages.length-1 ? @next.hide : nil
 		end
 	end
 	@previous.hide
