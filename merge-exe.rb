@@ -16,10 +16,11 @@ module PackShoes
   
   def PackShoes.merge_exe opts
     # setup defaults if not in the opts
+	packdir = 'packdir'
     opts['publisher'] = 'shoerb' unless opts['publisher']
     opts['website'] = 'http://shoesrb.com/' unless opts['website']
     opts['hkey_org'] = 'Hackety.org'
-	opts['app_ico'] = 'nsis/shoes.ico' unless opts['app_ico']
+	opts['app_ico'] = "#{Dir.getwd}/#{packdir}/nsis/shoes.ico" unless opts['app_ico']
 	opts['app_installer_ico'] = 'nsis/shoes.ico' unless opts['app_installer_ico']
 	#opts['license'] = 'ytm/Ytm.license' unless opts['license']
 	opts['nsis_name'] = opts['installer_header'] ? opts['installer_header'] : opts['app_name']
@@ -29,7 +30,6 @@ module PackShoes
     toplevel = []
     Dir.chdir(DIR) { Dir.glob('*') {|f| toplevel << f} }
     exclude = %w(static CHANGELOG.txt cshoes.exe gmon.out README.txt samples)
-    packdir = 'packdir'
     rm_rf packdir
     mkdir_p(packdir) # where makensis will find it.
     (toplevel-exclude).each { |p| cp_r File.join(DIR, p), packdir }
@@ -99,7 +99,9 @@ module PackShoes
     tp_img ? ( cp tp_img, "#{packdir}/nsis/installer-2.bmp") : nil
     # stuff icon into a new app_name.exe using shoes.exe 
     Dir.chdir(packdir) do |p|
+		puts "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq #{DIR}"
 		winico_path = "#{opts['app_ico'].tr('/','\\')}"
+		puts "aaqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq #{winico_path}"
 		cmdl = "\"..\\portable_apps\\ResHack\\ResHacker.exe\" -modify  shoes.exe, \"#{opts['app_name']}.exe\", \"#{winico_path}\", icongroup,32512,1033"
 		if system(cmdl)
 			rm 'shoes.exe' if File.exist?("#{opts['app_name']}.exe")

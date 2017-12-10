@@ -60,9 +60,9 @@ require("yaml")
 			button("Help", left: 350, top: 15, width: 80) { help }
 			button("Load yaml", left: 65, top: 15, width: 80, tooltip: "existing yaml configuration") { load_yaml }
 			line(30,55,470,55)
-			para "* - required field", left: 40, top: 60
+			para "* - required field", left: 340, top: 60
 		end
-		stack left: 70, top: 170, width: 460, height: 640, scroll: true do
+		stack left: 70, top: 170, width: 460, height: 630, scroll: true do
 			[ "Installer window name",    #### arranged the array vertically to make troubleshooting page 1 managable
 			"Installer side pic (164 x 309) .bmp",
 			"Installer header pic (150 x 57) .bmp",	
@@ -84,11 +84,11 @@ require("yaml")
 					case @options[i] ## adding ask_folder, ask_file boxes where needed
 						when 1 then button("Select file", left: 20 + @edit_box_width, top: 27, width: 100) { @database[i].text = fix_string(ask_open_file) }
 						when 2 then button("Select folder", left: 20 + @edit_box_width, top: 27, width: 100) { @database[i].text = fix_string(ask_open_folder) }
-						when 3 then button("Select *.rb file", left: 20 + @edit_box_width, top: 27, width: 100) do
+						when 3 then @database[i].state = 'disabled';
+						button("Select *.rb file", left: 20 + @edit_box_width, top: 27, width: 100) do
 							 longfn = fix_string(ask_open_file)
 							 @database[i].text = File.basename(longfn)
 							 appdir = File.dirname(longfn)
-							 debug(@app_loc)
 							 @database[10].text = appdir
 							 @values['app_loc'] = appdir
 						end
