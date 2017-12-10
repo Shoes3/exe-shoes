@@ -1,10 +1,10 @@
 Shoes.app(title: "Package app in exe", width: 600, height: 900, resizable: false ) do
 require("yaml")
 	
-	@edit_box_height, @edit_box_width = 28, 200 ### box dimmensions
+	@edit_box_height, @edit_box_width = 28, 250 ### box dimmensions
 	@options = [ 0, 1, 1, 1, 0, 0, 0, 0, 0, 2, 0, 1 ]
 	@output = [ "installer_header", "installer_sidebar_bmp", "installer_header_bmp", "app_installer_ico", "app_name", "app_version", "app_startmenu", "publisher", "website", "app_loc", "app_start", "app_ico", "include_gems" ]
-	@database = [ @installer_header, @setup_side, @setup_head, @setup_icon, @app_name, @app_version, @app_startmenu, @publisher, @website, @app_loc, @app_begin, @app_icon, @gems = [] ]
+	@database = [ @installer_header, @setup_side, @setup_head, @setup_icon, @app_name, @app_version, @app_startmenu, @publisher, @website, @app_loc, @app_start, @app_icon, @gems = [] ]
 	@values = Hash[@output.map {|x| [x, ""]}]
 	@values['include_gems']	= []
 	
@@ -42,6 +42,15 @@ require("yaml")
 		end
 	end
 	
+	def prerequisites
+		@must_have = [ @values['app_name'], @values['app_version'], @values['app_loc'], @values['app_start'] ]
+		if @must_have.any? { |m| m.nil? || m == "" } then
+			return 1
+		else 
+			return 0
+		end
+	end
+	
 	def page1
 		@page = 1
 		
@@ -53,7 +62,7 @@ require("yaml")
 			button("Load yaml", left: 65, top: 15, width: 80, tooltip: "existing yaml configuration") { load_yaml }
 			line(30,55,470,55)
 		end
-		stack left: 40, top: 170, width: 490, height: 640, scroll: true do
+		stack left: 70, top: 170, width: 460, height: 640, scroll: true do
 			[ "Installer window name",    #### arranged the array vertically to make troubleshooting page 1 managable
 			"Installer side pic (164 x 309) .bmp",
 			"Installer header pic (150 x 57) .bmp",	
@@ -83,11 +92,13 @@ require("yaml")
 	def page2
 		@page = 2
 		subtitle "Manage gems", align: "center", top: 5
-		stack left: 100, top: 70, width: 400 do
+		stack(left: 40, top: 70, width: 500, height: 750) do
 			background darkgray
 			border black, strokewidth: 2
-			line(30,55,380,55)
-			para "Select aditional gems:", align: "center", margin_top: 70, margin_bottom: 20
+			line(30,55,470,55)
+		end
+		scroll_bug=stack left: 70, top: 170, width: 460, height: 640, scroll: true do
+			para "Select aditional gems:", align: "center", size: 16, margin_bottom: 20
 			Gem::Specification.each do |gs|
 				flow margin_left: 50 do
 					check(checked: @values['include_gems'].include?(gs.name) ? true : false ) do |c|
@@ -97,14 +108,26 @@ require("yaml")
 				end
 			end			
 		end
+		start { scroll_bug.scroll_top = 1 }  ## this line fixes bug with scroll bar
 	end
 
 	def page3
 		subtitle "Config Summary", align: "center", top: 5
-		flow left: 50, top: 80, width: app.width - 100 do
+		values_exist = {}
+		stack(left: 40, top: 70, width: 500, height: 750) do
 			background darkgray
 			border black, strokewidth: 2
-			values_exist = {}
+			line(30,55,470,55)
+			button "Save confg", left: 65, top: 15, width: 80 do
+				File.open(ask_save_file, "w") { |f| f.write(values_exist.to_yaml) }
+			end
+			button "Deploy", left: 350, top: 15, width: 80 do
+				File.open("temp", "w") { |f| f.write(values_exist.to_yaml) }
+				system("cshoes.exe --ruby values-merge.rb temp") 
+			end
+		end
+		stack left: 70, top: 170, width: 460, height: 640, scroll: true do
+			
 			@values.each do |k, v|
 				if v != "" and v != nil then
 					values_exist["#{k}"] = v
@@ -112,16 +135,12 @@ require("yaml")
 			end
 			para "#{values_exist.to_yaml}"
 		end
-		button("Save confg", displace_left: 40, displace_top: 20, width: 100) { File.open(ask_save_file, "w") { |f| f.write(@values.to_yaml) } }
-		button("Deploy", displace_left: 360, displace_top: 20, width: 100) do
-			File.open("temp", "w") { |f| f.write(@values.to_yaml) }
-			system("cshoes.exe --ruby values-merge.rb temp") 
-		end
+		
 	end
 	
 	background dimgray
 	@pages = [ method(:page1),method(:page2), method(:page3) ]
-	@frame = flow(height: 800, scroll: true) { @pages[0].call }
+	@frame = flow(height: 800) { @pages[0].call }
 	
 	@previous = button "Previous", left: 200, top: 85, width: 80 do
 		turn_page "down"
@@ -130,9 +149,13 @@ require("yaml")
 	end
 	start { @previous.hide }
 	@next = button "Next", left: 295, top: 85, width: 80 do
-		turn_page "up"
-		@previous.show
-		@page == @pages.length ? @next.hide : nil
+		if @page == 1 && prerequisites == 1 then
+			alert "One or more required fields are empty!"
+		else
+			turn_page "up"
+			@previous.show
+			@page == @pages.length ? @next.hide : nil
+		end
 	end
 	@previous.hide
 end
