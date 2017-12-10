@@ -1,7 +1,5 @@
 ; Shoes definitions
 !define APP_NAME "#{APPNAME}"
-!define NSIS_NAME "#{NSIS_NAME}"
-!define APP_STARTMENU_NAME "#{STARTMENU_NAME}"
 !define APP_VERSION "#{WINVERSION}"
 !define APP_PUBLISHER "#{PUBLISHER}"
 !define APP_WEB_SITE "#{WEBSITE}"
@@ -40,7 +38,7 @@ Var UninstallerHasFinished
 !insertmacro MUI_PAGE_LICENSE "..\COPYING.txt"
 
 ; MUI Start Menu Folder Page Configuration
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${APP_STARTMENU_NAME}"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${APP_NAME}"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "${APP_INST_KEY}" 
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
@@ -62,8 +60,8 @@ Var UninstallerHasFinished
 !insertmacro MUI_LANGUAGE "English"
 
 ; NSIS Output information
-Name "${NSIS_NAME}"
-OutFile "${APP_NAME} Setup.exe"
+Name "${APP_NAME} ${APP_VERSION}"
+OutFile "${APP_NAME}-${APP_VERSION}.exe"
 InstallDir "$PROGRAMFILES\${APP_NAME}"
 InstallDirRegKey HKLM "${APP_INST_KEY}" ""
 RequestExecutionLevel admin
@@ -76,8 +74,8 @@ Section "MainSection" SEC01
    SetOverwrite ifnewer
 
    !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-      CreateDirectory "$SMPROGRAMS\${APP_STARTMENU_NAME}"
-      CreateShortCut "$SMPROGRAMS\${APP_STARTMENU_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_NAME}.exe"
+      CreateDirectory "$SMPROGRAMS\${APP_NAME}"
+      CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_NAME}.exe"
       ;CreateShortCut "$SMPROGRAMS\${APP_NAME}\Manual.lnk" "$INSTDIR\${APP_NAME}.exe" "--manual"
       ;CreateShortCut "$SMPROGRAMS\${APP_NAME}\Packager.lnk" "$INSTDIR\${APP_NAME}.exe" "--package"
    !insertmacro MUI_STARTMENU_WRITE_END
@@ -91,15 +89,15 @@ Section "MainSection" SEC01
 SectionEnd
 
 Section -AdditionalIcons
-   CreateShortCut "$SMPROGRAMS\${APP_STARTMENU_NAME}\Uninstall ${APP_NAME}.lnk" "$INSTDIR\Uninstall.exe"
+   ;CreateShortCut "$SMPROGRAMS\${APP_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
-   WriteUninstaller "$INSTDIR\Uninstall.exe"
+   WriteUninstaller "$INSTDIR\uninst.exe"
    WriteRegStr HKLM "${APP_INST_KEY}" "" "$INSTDIR\${APP_NAME}.exe"
    ;WriteRegStr HKLM "${APP_INST_KEY}" "base" "$INSTDIR"
    WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "DisplayName" "$(^Name)"
-   WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "UninstallString" "$INSTDIR\Uninstall.exe"
+   WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
    WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${APP_NAME}.exe"
    WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "DisplayVersion" "${APP_VERSION}"
    WriteRegStr ${APP_UNINST_ROOT_KEY} "${APP_UNINST_KEY}" "URLInfoAbout" "${APP_WEB_SITE}"
@@ -114,12 +112,12 @@ Section Uninstall
    !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
 
    Delete "$DESKTOP\${APP_NAME}.lnk"
-   Delete "$SMPROGRAMS\${APP_STARTMENU_NAME}\Manual.lnk"
-   Delete "$SMPROGRAMS\${APP_STARTMENU_NAME}\Packager.lnk"
-   Delete "$SMPROGRAMS\${APP_STARTMENU_NAME}\${APP_NAME}.lnk"
-   Delete "$SMPROGRAMS\${APP_STARTMENU_NAME}\Uninstall ${APP_NAME}.lnk"
+   Delete "$SMPROGRAMS\${APP_NAME}\Manual.lnk"
+   Delete "$SMPROGRAMS\${APP_NAME}\Packager.lnk"
+   Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"
+   Delete "$SMPROGRAMS\${APP_NAME}\Uninstall.lnk"
 
-   RMDir "$SMPROGRAMS\${APP_STARTMENU_NAME}"
+   RMDir "$SMPROGRAMS\${APP_NAME}"
    RMDir /r "$INSTDIR\*.*"
    RMDir "$INSTDIR"
    
