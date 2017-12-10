@@ -17,13 +17,16 @@ users.   Of course, you will have to do to some work.
 
 * You need Shoes 3.3.3 ,r(2921) or newer installed on your Windows machine doing the 
   packaging
+* You need NSIS Unicode installed on your Windows machine. Version 2.45.6 is good
+  but can be hard to find. [http://shoes.mvmanila.com/public/shoesdeps/mingw/nsis-2.46.5-Unicode-setup.exe]
+  Please use NSIS Unicode if you value your users. 
+* You need [http://www.angusj.com/resourcehacker] Resource Hacker or some way
+  to set the icon of an exe
 * You'll need a way to, and the graphics skills to create an icon for the Installer and two old time .bmp files
   for the installer. I use Gimp but thats just me. 
 * You may have to modify the scripts in the project and NSIS scripts but there's 
   nothing particularly clever or difficult about the Ruby - NSIS is a shock but
   that's the very last place you should be looking to fix things. 
-
-  Note: Application uses NSIS and ResourceHacker third party applications which come with the package as a portable applications
 
 ## Contents 
 
@@ -77,7 +80,9 @@ here = Dir.getwd
 home = ENV['HOME']
 appdata =   ENV['LOCALAPPDATA']
 appdata  =   ENV['APPDATA'] if ! appdata
+GEMS_DIR = File.join(appdata.tr('\\','\/'), 'Shoes','+gem')
 $stderr.puts "DIR = #{DIR}"
+$stderr.puts "GEMS_DIR = #{GEMS_DIR}"
 $stderr.puts "Here = #{here}"
 PackShoes::merge_exe opts
 ```
@@ -90,29 +95,28 @@ The .yaml for the example is
 ```
 app_name: Ytm
 app_version: 'Demo'
-app_loc: C:/Projects/exe-shoes/ytm
+app_loc: C:/Projects/exe-shoes/ytm/
 app_start: ytm.rb
 app_png: ytm.png
-installer_header: 'YTM wizard'
 app_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 app_installer_ico: C:/Projects/exe-shoes/ytm/ytm.ico
 installer_sidebar_bmp: E:/icons/ytm/installer-1.bmp
 installer_header_bmp: E:/icons/ytm/installer-2.bmp
 publisher: 'YTM Corp Inc'
 website: 'https://github.com/Shoes3/shoes3'
+hkey_org: 'mvmanila.com'
+license: C:/Projects/exe-shoes/ytm/Ytm.license
 include_gems:
  - sqlite3
- - nokogiri
- - ffi
- - rubyserial
+ - nokogiri-1.6.7.1-x86-mingw32
+ - ffi-1.9.10-x86-mingw32
+ - rubyserial-0.2.4
 ```
  Remember - That is just a demo!  Give it a try to see how it works. 
  
  WARNING: because it's yaml and read by Ruby you must use Ruby Windows file path
  syntax. There is a special place in hell if you use Windows `\`. To be safe
  do not have any spaces in any of the path or file names. 
- 
- installer_header, installer_sidebar_bmp, installer_header_bmp: those are related to the installation wizard of the app.
  
  app_loc: is where your app to package is and app_start: is the starting script
  in app_loc. app_png is your app icon in png format. (if you need it - it's good idea). 
