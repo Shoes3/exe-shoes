@@ -17,11 +17,6 @@ users.   Of course, you will have to do to some work.
 
 * You need Shoes 3.3.3 ,r(2921) or newer installed on your Windows machine doing the 
   packaging
-* You need NSIS Unicode installed on your Windows machine. Version 2.45.6 is good
-  but can be hard to find. [http://shoes.mvmanila.com/public/shoesdeps/mingw/nsis-2.46.5-Unicode-setup.exe]
-  Please use NSIS Unicode if you value your users. 
-* You need [http://www.angusj.com/resourcehacker] Resource Hacker or some way
-  to set the icon of an exe
 * You'll need a way to, and the graphics skills to create an icon for the Installer and two old time .bmp files
   for the installer. I use Gimp but thats just me. 
 * You may have to modify the scripts in the project and NSIS scripts but there's 
