@@ -1,15 +1,19 @@
 ---
-installer_header: NCF Utility setup
-installer_sidebar_bmp:
-installer_header_bmp:
-app_installer_ico:
-app_name: NCF Utility
-app_version: '1'
-app_startmenu: NCF Utility
-publisher: dredknight
-website: www.heroescommunity.com
-app_loc: C:/Users/yordan.kostov/Documents/GitHub/Heroes-5-modding-scripts/NCF_configuration_app
-app_start: main.rb
-app_ico: C:/Users/yordan.kostov/Documents/GitHub/Heroes-5-modding-scripts/icons/ncf.ico
+app_name: Ytm
+app_version: 'Demo'
+app_loc: C:/Projects/exe-shoes/ytm
+app_start: ytm.rb
+app_png: C:/Projects/exe-shoes/ytm/ytm.png
+app_ico: C:/Projects/exe-shoes/ytm/ytm.ico
+app_installer_ico: C:/Projects/exe-shoes/ytm/ytm.ico
+installer_sidebar_bmp: E:/icons/ytm/installer-1.bmp
+installer_header_bmp: E:/icons/ytm/installer-2.bmp
+publisher: 'YTM Corp Inc'
+website: 'https://github.com/Shoes3/shoes3'
+hkey_org: 'mvmanila.com'
+license: C:/Projects/exe-shoes/ytm/Ytm.license
 include_gems:
-- rubyzip
+ - sqlite3
+ - nokogiri
+ - ffi
+ - rubyserial

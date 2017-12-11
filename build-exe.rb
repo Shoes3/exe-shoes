@@ -2,12 +2,25 @@ Shoes.app(title: "Package app in exe", width: 600, height: 900, resizable: false
 require("yaml")
 	
 	@edit_box_height, @edit_box_width = 28, 250 ### box dimmensions
-	@options = [ 0, 1, 1, 1, 0, 0, 0, 0, 0, 3, -1, 1 ]
-	@output = [ "installer_header", "installer_sidebar_bmp", "installer_header_bmp", "app_installer_ico", "app_name", "app_version", "app_startmenu", "publisher", "website", "app_start", "app_loc", "app_ico", "include_gems" ]
+	@options = [ 0, 0, 0, 0, 0, 3, -1, 1, 0, 1, 1, 1, 1 ]
+	@output = [ "app_name", "app_version", "app_startmenu", "publisher", "website", "app_start", "app_loc", "app_ico", "installer_header", "installer_sidebar_bmp", "installer_header_bmp", "app_installer_ico", "license", "include_gems" ]
 	@database = []  ##array of all page 1 fields
 	@values = Hash[@output.map {|x| [x, ""]}] ##Hash of all user input taken from the database fields
 	@values['include_gems']	= [] ##defining an array that will hold all gems
 	@must_have = [ 'app_name', 'app_version','app_loc', 'app_start' ] ### @must_have consists of mandatory app options
+	@tooltips = [ "Appname and the Subname string will be used to name the installer File",
+"Appname and the Subname string will be used to name the installer File",
+"Start Menu folder name. If not set Appname will be chosen as default value.",
+"Company or organization name",
+"Publisher website URL",
+"The first script to run for your Shoes app",
+"Application directory. Chosen automatically based on starting script selection",
+"Window app icon for your Shoes app",
+"Installation wizard header name. If empty Appname is chosen as default value.",
+"The sidebar image (old bmp) for the installer",
+"The header image for the installer",
+"The icon for the #{@values['app_name']}-#{@values['app_version']}.exe file - NOT the icon for app desktop",
+"Prepend the contents to the Shoes LICSENSE.txt file\nwill be shown to the User at install time, so make it pretty." ]
 	
 	
 	def fix_string str
@@ -54,31 +67,37 @@ require("yaml")
 	
 	def page1
 		subtitle "Wizard & application settings", align: "center", top: 10
-		stack(left: 40, top: 70, width: 500, height: 750) do
+		stack(left: 50, top: 70, width: 500, height: 750) do
 			background darkgray;
 			border black, strokewidth: 2; 
 			button("Help", left: 350, top: 15, width: 80) { help }
-			button("Load yaml", left: 65, top: 15, width: 80, tooltip: "existing yaml configuration") { load_yaml }
+			button("Load yaml", left: 65, top: 15, width: 80, tooltip: "Load existing yaml configuration") { load_yaml }
 			line(30,55,470,55)
 			para "* - required field", left: 340, top: 60
 		end
+		
 		stack left: 70, top: 170, width: 460, height: 630, scroll: true do
-			[ "Installer window name",    #### arranged the array vertically to make troubleshooting page 1 managable
-			"Installer side pic (164 x 309) .bmp",
-			"Installer header pic (150 x 57) .bmp",	
-			"Installer icon (.ico)",
-			"Application name",
-			"Application version",
+			[ "Application name",    #### arranged the array vertically to make troubleshooting page 1 managable
+			"Application subname",
 			"Start Menu folder name",
 			"Publisher name",
 			"Website",
-			"Starting script",
+			"Starting script source",
 			"Application folder",
-			"Exe icon (.ico)" ].each_with_index do | item, i |
+			"Exe icon (.ico)",
+			"Installer window name",
+			"Installer side pic (164 x 309) .bmp",
+			"Installer header pic (150 x 57) .bmp",	
+			"Installer icon (.ico)",
+			"License" ].each_with_index do | item, i |
 				req = @must_have.include?(@output[i]) ? "* " : ""
+				case @output[i] 
+				when 'app_name' then para "Application properties", size: 16
+				when 'installer_header' then para "Installation file properties", left: 0, size: 16, margin_top: 10
+				end
 				flow height: 60 do
 					para "#{req}#{item}", left: 20, top: 0, height: @edit_box_height
-					@database[i] = edit_line @values[@output[i]], left: 20, top: 28, height: @edit_box_height, width: @edit_box_width do
+					@database[i] = edit_line @values[@output[i]], left: 20, top: 28, height: @edit_box_height, width: @edit_box_width, tooltip: @tooltips[i] do
 						@values[@output[i]]=@database[i].text
 					end
 					case @options[i] ## adding ask_folder, ask_file boxes where needed
@@ -89,7 +108,7 @@ require("yaml")
 							 longfn = fix_string(ask_open_file)
 							 @database[i].text = File.basename(longfn)
 							 appdir = File.dirname(longfn)
-							 @database[10].text = appdir
+							 @database[6].text = appdir
 							 @values['app_loc'] = appdir
 						end
 						when -1 then @database[i].state = 'disabled'
@@ -101,7 +120,7 @@ require("yaml")
 	
 	def page2
 		subtitle "Manage gems", align: "center", top: 5
-		stack(left: 40, top: 70, width: 500, height: 750) do
+		stack(left: 50, top: 70, width: 500, height: 750) do
 			background darkgray
 			border black, strokewidth: 2
 			line(30,55,470,55)
@@ -121,9 +140,14 @@ require("yaml")
 	end
 
 	def page3
-		subtitle "Config Summary", align: "center", top: 5
+		subtitle "Configuration summary", align: "center", top: 5
 		values_exist = {}
-		stack(left: 40, top: 70, width: 500, height: 750) do
+		@values.each do |k, v|
+			if v != "" and v != nil and !v.empty? then
+				values_exist["#{k}"] = v
+			end
+		end
+		stack(left: 50, top: 70, width: 500, height: 750) do
 			background darkgray
 			border black, strokewidth: 2
 			line(30,55,470,55)
@@ -131,17 +155,13 @@ require("yaml")
 				File.open(ask_save_file, "w") { |f| f.write(values_exist.to_yaml) }
 			end
 			deploy=button "Deploy", left: 350, top: 15, width: 80 do
-				deploy.state = 'disabled'
+				start { deploy.state = 'disabled' }
 				File.open("temp", "w") { |f| f.write(values_exist.to_yaml) }
 				system("cshoes.exe --ruby ytm-merge.rb temp")
 			end
+			para "Yaml output", top: 60, size: 16, align: "center"
 		end
 		stack left: 70, top: 170, width: 460, height: 640, scroll: true do
-			@values.each do |k, v|
-				if v != "" and v != nil then
-					values_exist["#{k}"] = v
-				end
-			end
 			para "#{values_exist.to_yaml}"
 		end
 		
@@ -151,7 +171,6 @@ require("yaml")
 	@pages = [ method(:page1),method(:page2), method(:page3) ]
 	@page = 0
 	@frame = flow(height: 800) { @pages[@page].call }
-	
 	@previous = button "Previous", left: 200, top: 85, width: 80 do
 		turn_page "down"
 		@next.show

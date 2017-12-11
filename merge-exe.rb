@@ -19,12 +19,13 @@ module PackShoes
 	packdir = 'packdir'
     opts['publisher'] = 'shoerb' unless opts['publisher']
     opts['website'] = 'http://shoesrb.com/' unless opts['website']
-    opts['hkey_org'] = 'Hackety.org'
+    opts['hkey_org'] = 'mvmanila.com'
 	opts['app_ico'] = "#{Dir.getwd}/#{packdir}/nsis/shoes.ico" unless opts['app_ico']
 	opts['app_installer_ico'] = 'nsis/shoes.ico' unless opts['app_installer_ico']
-	#opts['license'] = 'ytm/Ytm.license' unless opts['license']
 	opts['nsis_name'] = opts['installer_header'] ? opts['installer_header'] : opts['app_name']
 	opts['app_startmenu'] = opts['app_name'] unless opts['app_startmenu']
+	opts['app_version'] = '1'
+	incl_gems = opts['include_gems'] || []
 	ruby_ver = RUBY_VERSION[/\d.\d/].to_str
 	
     toplevel = []
@@ -33,10 +34,13 @@ module PackShoes
     rm_rf packdir
     mkdir_p(packdir) # where makensis will find it.
     (toplevel-exclude).each { |p| cp_r File.join(DIR, p), packdir }
-	
+
     # do the license stuff
     licf = File.open("#{packdir}/COPYING.txt", 'w')
-    IO.foreach("#{DIR}/COPYING.txt") { |ln| licf.puts ln }  
+    if opts['license'] && File.exist?(opts['license'])
+      IO.foreach(opts['license']) {|ln| licf.puts ln}
+    end
+    IO.foreach("#{DIR}/COPYING.txt") {|ln| licf.puts ln}
     licf.close
 	
     # we do need some statics for console to work. 
@@ -73,7 +77,6 @@ module PackShoes
     rewrite logf, 'min-log.rb', {'CONSOLE_HDR' => "#{opts['app_name']} Errors"}
     logf.close
     # Delete all gems besides the chosen one //dredknight
-	incl_gems = opts['include_gems'] || []
 	sgpath = "#{packdir}/lib/ruby/gems/#{ruby_ver}.0"
 	Dir.glob("#{sgpath}/specifications/**/*gemspec").each do |p|
 		gem = File.basename(p, '.gemspec')
@@ -99,9 +102,7 @@ module PackShoes
     tp_img ? ( cp tp_img, "#{packdir}/nsis/installer-2.bmp") : nil
     # stuff icon into a new app_name.exe using shoes.exe 
     Dir.chdir(packdir) do |p|
-		puts "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq #{DIR}"
 		winico_path = "#{opts['app_ico'].tr('/','\\')}"
-		puts "aaqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq #{winico_path}"
 		cmdl = "\"..\\portable_apps\\ResHack\\ResHacker.exe\" -modify  shoes.exe, \"#{opts['app_name']}.exe\", \"#{winico_path}\", icongroup,32512,1033"
 		if system(cmdl)
 			rm 'shoes.exe' if File.exist?("#{opts['app_name']}.exe")

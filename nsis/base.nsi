@@ -63,7 +63,7 @@ Var UninstallerHasFinished
 
 ; NSIS Output information
 Name "${NSIS_NAME}"
-OutFile "${APP_NAME} Setup.exe"
+OutFile "${APP_NAME}-${APP_VERSION} Setup.exe"
 InstallDir "$PROGRAMFILES\${APP_NAME}"
 InstallDirRegKey HKLM "${APP_INST_KEY}" ""
 RequestExecutionLevel admin
