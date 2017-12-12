@@ -1,5 +1,0 @@
-[09 Dec 2017, 22:33:34]
-"..\portable_apps\ResHack\ResHacker.exe" -modify  shoes.exe, "NCF Utility.exe", "C:\Users\yordan.kostov\Documents\GitHub\Heroes-5-modding-scripts\icons\ncf.ico", icongroup,32512,1033
-  Modified: ICONGROUP,32512,1033
-
-Commands completed
