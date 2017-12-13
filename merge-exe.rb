@@ -1,4 +1,3 @@
-
 module PackShoes
  require 'fileutils'
  def PackShoes.rewrite a, before, hsh
@@ -15,61 +14,60 @@ module PackShoes
     end
   end
   
-  # returns a path that can be used for Windows system() when
-  # the path has spaces in it.  Doesn't help backtick commands - don't do
-  # that. 
-  def PackShoes.exe_esc path
-    if path.index(' ')
-      return "\"#{path}\""
-    else 
-      return path
-    end
-  end
-  
   def PackShoes.merge_exe opts
     # setup defaults if not in the opts
+	packdir = 'packdir'
     opts['publisher'] = 'shoerb' unless opts['publisher']
     opts['website'] = 'http://shoesrb.com/' unless opts['website']
-    opts['hkey_org'] = 'Hackety.org' unless opts['hkey_org']
+    opts['hkey_org'] = 'mvmanila.com'
+	opts['app_ico'] = "#{Dir.getwd}/#{packdir}/nsis/shoes.ico" unless opts['app_ico']
+	opts['app_installer_ico'] = 'nsis/shoes.ico' unless opts['app_installer_ico']
+	opts['nsis_name'] = opts['installer_header'] ? opts['installer_header'] : opts['app_name']
+	opts['app_startmenu'] = opts['app_name'] unless opts['app_startmenu']
+	opts['app_version'] = '1'
+	incl_gems = opts['include_gems'] || []
+	ruby_ver = RUBY_VERSION[/\d.\d/].to_str
+	
     toplevel = []
-    Dir.chdir(DIR) do
-      Dir.glob('*') {|f| toplevel << f}
-    end
-    exclude = %w(static CHANGELOG.txt cshoes.exe gmon.out README.txt
-      samples)
-    #exclude = []
-    packdir = 'packdir'
+    Dir.chdir(DIR) { Dir.glob('*') {|f| toplevel << f} }
+    exclude = %w(static CHANGELOG.txt cshoes.exe gmon.out README.txt samples)
     rm_rf packdir
     mkdir_p(packdir) # where makensis will find it.
-    (toplevel-exclude).each do |p|
-      cp_r File.join(DIR, p), packdir
-    end
-    # do the license struff
+    (toplevel-exclude).each { |p| cp_r File.join(DIR, p), packdir }
+
+    # do the license stuff
     licf = File.open("#{packdir}/COPYING.txt", 'w')
     if opts['license'] && File.exist?(opts['license'])
       IO.foreach(opts['license']) {|ln| licf.puts ln}
     end
-    IO.foreach("#{DIR}/COPYING.txt") {|ln| licf.puts ln}  
+    IO.foreach("#{DIR}/COPYING.txt") {|ln| licf.puts ln}
     licf.close
+	
     # we do need some statics for console to work. 
     mkdir_p "#{packdir}/static"
-    Dir.glob("#{DIR}/static/icon*.png") {|p| cp p, "#{packdir}/static" }
-    if opts['app_png']
-      cp "#{opts['app_loc']}/#{opts['app_png']}", "#{packdir}/static/app-icon.png"
+    Dir.glob("#{DIR}/static/icon*.png") { |p| cp p, "#{packdir}/static" }
+    opts['app_png'] ? ( cp "#{opts['app_loc']}/#{opts['app_png']}", "#{packdir}/static/app-icon.png" ) : nil
+
+    # remove chipmonk and ftsearch unless requested
+    exts = opts['include_exts'] || []
+    if  !exts || ! exts.include?('ftsearch')
+      puts "removing ftsearchrt.so"
+      rm_rf "#{packdir}/lib/shoes/help.rb"
+      rm_rf "#{packdir}/lib/shoes/search.rb"
     end
-    rbmm = RUBY_VERSION[/\d.\d/].to_str
+    if  !exts || ! exts.include?('chipmunk')
+      puts "removing chipmunk"
+      rm "#{packdir}/lib/shoes/chipmunk.rb"
+    end
     # get rid of some things in lib
     rm_rf "#{packdir}/lib/exerb"
     rm_rf "#{packdir}/lib/gtk-2.0" if File.exist? "#{packdir}/lib/gtk-2.0"
     # remove unreachable code in packdir/lib/shoes/ like help, app-package ...
-    ['cobbler', 'debugger', 'shoes_irb', 'pack', 'app_package', 'packshoes',
-      'remote_debugger', 'winject', 'envgem'].each {|f| rm "#{packdir}/lib/shoes/#{f}.rb" }
-  
+    not_needed = ['cobbler', 'debugger', 'shoes_irb', 'pack', 'app_package', 'packshoes', 'remote_debugger', 'winject', 'envgem']
+	not_needed.each {|f| rm "#{packdir}/lib/shoes/#{f}.rb" }
     # copy app contents (file/dir at a time)
     app_contents = Dir.glob("#{opts['app_loc']}/*")
-    app_contents.each do |p|
-     cp_r p, packdir
-    end
+    app_contents.each { |p| cp_r p, packdir }
     #create new lib/shoes.rb with rewrite
     newf = File.open("#{packdir}/lib/shoes.rb", 'w')
     rewrite newf, 'min-shoes.rb', {'APP_START' => opts['app_start'] }
@@ -78,84 +76,53 @@ module PackShoes
     logf = File.open("#{packdir}/lib/shoes/log.rb", 'w')
     rewrite logf, 'min-log.rb', {'CONSOLE_HDR' => "#{opts['app_name']} Errors"}
     logf.close
-    # copy/remove gems - tricksy - pay attention
-    # remove the Shoes built-in gems if not in the list 
-    incl_gems = opts['include_gems'] || []
-    rm_gems = []
-    Dir.glob("#{packdir}/lib/ruby/gems/#{rbmm}.0/specifications/*gemspec") do |p|
-      gem = File.basename(p, '.gemspec')
-      if incl_gems.include?(gem)
-        $stderr.puts "Keeping Shoes gem: #{gem}"
-        incl_gems.delete(gem)
-      else
-        rm_gems << gem
-      end
-    end
-    sgpath = "#{packdir}/lib/ruby/gems/#{rbmm}.0"
-    # sqlite is a special case so delete it differently - trickery
-    #if !incl_gems.include?('sqlite3')
-    #  spec = Dir.glob("#{sgpath}/specifications/default/sqlite3*.gemspec")
-    #  rm spec[0]
-    #  rm_gems << File.basename(spec[0],'.gemspec')
-    #else
-    #  incl_gems.delete("sglite3")
-    #end
-    rm_gems.each do |g|
-      $stderr.puts "Deleting #{g}"
-      rm_rf "#{sgpath}/specifications/#{g}.gemspec"
-      rm_rf "#{sgpath}/extensions/x86-mingw32/#{rbmm}.0/#{g}"
-      rm_rf "#{sgpath}/gems/#{g}"
-    end
+    # Delete all gems besides the chosen one //dredknight
+	sgpath = "#{packdir}/lib/ruby/gems/#{ruby_ver}.0"
+	Dir.glob("#{sgpath}/specifications/**/*gemspec").each do |p|
+		gem = File.basename(p, '.gemspec')
+		if !incl_gems.any? {|g| gem.include?(g) } then
+			puts "Deleting #{gem}"
+			rm_rf "#{sgpath}/specifications/#{gem}.gemspec"
+			rm_rf "#{sgpath}/specifications/default/#{gem}.gemspec"
+			rm_rf "#{sgpath}/extensions/x86-mingw32/#{ruby_ver}.0/#{gem}"
+			rm_rf "#{sgpath}/gems/#{gem}"
+		end
+	end
 
-    # copy requested gems from AppData\Local\shoes\+gems aka GEMS_DIR
-    #incl_gems.delete('sqlite3') if incl_gems.include?('sqlite3')
-    incl_gems.each do |name| 
-      $stderr.puts "Copy #{name}"
-      cp "#{GEMS_DIR}/specifications/#{name}.gemspec", "#{sgpath}/specifications"
-      cp_r "#{GEMS_DIR}/gems/#{name}", "#{sgpath}/gems"
-    end
-
-    $stderr.puts "make_installer"
-
+    puts "make_installer"
     mkdir_p "pkg"
-    #cp_r "VERSION.txt", "#{packdir}/VERSION.txt"
     rm_rf "#{packdir}/nsis"
     cp_r  "nsis", "#{packdir}/nsis"
     # Icon for installer
     cp opts['app_installer_ico'], "#{packdir}/nsis/setup.ico"
     # change nsis side bar and top images (bmp only)
     sb_img = opts['installer_sidebar_bmp'] 
-    if sb_img
-     cp sb_img, "#{packdir}/nsis/installer-1.bmp"
-    end
+    sb_img ? ( cp sb_img, "#{packdir}/nsis/installer-1.bmp" ) : nil
     tp_img = opts['installer_header_bmp']
-    if tp_img 
-     cp tp_img, "#{packdir}/nsis/installer-2.bmp"
-    end
+    tp_img ? ( cp tp_img, "#{packdir}/nsis/installer-2.bmp") : nil
     # stuff icon into a new app_name.exe using shoes.exe 
     Dir.chdir(packdir) do |p|
-      winico_path = "#{opts['app_ico'].tr('/','\\')}"
-      #cmdl = "\"C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe\" -modify  shoes.exe, #{opts['app_name']}.exe, #{winico_path}, icongroup,32512,1033"
-      cmdl = "#{exe_esc opts['reshack_loc']} -modify  shoes.exe, #{opts['app_name']}.exe, #{winico_path}, icongroup,32512,1033"
-      $stderr.puts cmdl
-      if system(cmdl)
-        rm 'shoes.exe' if File.exist?("#{opts['app_name']}.exe")
-      else 
-        $stderr.puts "FAIL: #{$?} #{cmdl}"
-      end
+		winico_path = "#{opts['app_ico'].tr('/','\\')}"
+		cmdl = "\"..\\portable_apps\\ResHack\\ResHacker.exe\" -modify  shoes.exe, \"#{opts['app_name']}.exe\", \"#{winico_path}\", icongroup,32512,1033"
+		if system(cmdl)
+			rm 'shoes.exe' if File.exist?("#{opts['app_name']}.exe")
+		else
+			puts "FAIL: #{$?} #{cmdl}"
+		end
     end
     newn = File.open("#{packdir}/nsis/#{opts['app_name']}.nsi", 'w')
     rewrite newn, "#{packdir}/nsis/base.nsi", {
-      'APPNAME' => opts['app_name'],
+      'APPNAME' => "#{opts['app_name']}",
       'WINVERSION' => opts['app_version'],
-      "PUBLISHER" => opts['publisher'],
-      "WEBSITE" => opts['website'],
-      "HKEY_ORG" => opts['hkey_org']
+	  'STARTMENU_NAME' => opts['app_startmenu'],
+      'PUBLISHER' => opts['publisher'],
+      'WEBSITE' => opts['website'],
+      'HKEY_ORG' => opts['hkey_org'],
+	  'NSIS_NAME' => "#{opts['nsis_name']}"
       }
     newn.close
     Dir.chdir("#{packdir}/nsis") do |p|
-      #system "\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" #{opts['app_name']}.nsi\""
-      system "#{exe_esc opts['nsis_loc']} #{opts['app_name']}.nsi"
+	  system "\"..\\..\\portable_apps\\NSIS\\App\\NSIS\\makensis.exe\" \"#{opts['app_name']}\".nsi\""
       Dir.glob('*.exe') { |p| mv p, '../../pkg' }
     end
   end
