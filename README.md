@@ -104,8 +104,6 @@ license: C:/Projects/exe-shoes/ytm/Ytm.license
 include_gems:
  - sqlite3
  - nokogiri-1.6.7.1-x86-mingw32
- - ffi-1.9.10-x86-mingw32
- - rubyserial-0.2.4
 ```
  Remember - That is just a demo!  Give it a try to see how it works. 
  
@@ -119,10 +117,10 @@ include_gems:
  where point to it. If you want a different icon for the installer - app_installer_ico:
  
  Gem are fun. You can include Shoes built in gems like sqlite and nokogiri as shown above
- and you can include gems you have installed in the Shoes that is running the script
- like ffi and rubyserial in the example. If you can't install the Gems in Shoes, then you can't include them.
- We don't automatically include dependent gems. You'll have to do that yourself with
- proper entries in your yaml file as I've shown above, 'rubyserial' requires 'ffi'
+ and you can include gems you have installed in the Shoes that is running the script. 
+ If you can't install the Gems in Shoes, then you can't include them.
+ We don't automatically include dependent gems and libraries. You'll have to do that yourself with
+ proper entries in your yaml file. 
  
 ### app_name, app_version:
 

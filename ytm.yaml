@@ -15,5 +15,3 @@ license: C:/Projects/exe-shoes/ytm/Ytm.license
 include_gems:
  - sqlite3
  - nokogiri
- - ffi
- - rubyserial
